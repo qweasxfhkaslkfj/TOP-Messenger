@@ -16,7 +16,7 @@ namespace TOP_Messenger
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FormClient());
+            Application.Run(new FormRegistration());
         }
     }
 }

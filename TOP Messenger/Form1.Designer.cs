@@ -30,7 +30,7 @@
         {
             this.buttonPlayGame = new System.Windows.Forms.Button();
             this.panelUsers = new System.Windows.Forms.Panel();
-            this.btnUserPavPav = new System.Windows.Forms.Button();
+            this.btnSpecialGroups = new System.Windows.Forms.Button();
             this.btnUserAnanas = new System.Windows.Forms.Button();
             this.btnUserVld = new System.Windows.Forms.Button();
             this.buttonUserUSF = new System.Windows.Forms.Button();
@@ -52,7 +52,6 @@
             this.buttonDownload = new System.Windows.Forms.Button();
             this.labelNameFiles = new System.Windows.Forms.Label();
             this.vScrollBar1 = new System.Windows.Forms.VScrollBar();
-            this.btnSpecialGroups = new System.Windows.Forms.Button();
             this.panelUsers.SuspendLayout();
             this.panelChats.SuspendLayout();
             this.panelHistoryFiles.SuspendLayout();
@@ -71,7 +70,6 @@
             // panelUsers
             // 
             this.panelUsers.Controls.Add(this.btnSpecialGroups);
-            this.panelUsers.Controls.Add(this.btnUserPavPav);
             this.panelUsers.Controls.Add(this.btnUserAnanas);
             this.panelUsers.Controls.Add(this.btnUserVld);
             this.panelUsers.Controls.Add(this.buttonUserUSF);
@@ -88,15 +86,14 @@
             this.panelUsers.Size = new System.Drawing.Size(177, 554);
             this.panelUsers.TabIndex = 1;
             // 
-            // btnUserPavPav
+            // btnSpecialGroups
             // 
-            this.btnUserPavPav.Enabled = false;
-            this.btnUserPavPav.Location = new System.Drawing.Point(0, 468);
-            this.btnUserPavPav.Name = "btnUserPavPav";
-            this.btnUserPavPav.Size = new System.Drawing.Size(177, 32);
-            this.btnUserPavPav.TabIndex = 11;
-            this.btnUserPavPav.Text = "PavPav";
-            this.btnUserPavPav.UseVisualStyleBackColor = true;
+            this.btnSpecialGroups.Location = new System.Drawing.Point(0, 6);
+            this.btnSpecialGroups.Name = "btnSpecialGroups";
+            this.btnSpecialGroups.Size = new System.Drawing.Size(177, 32);
+            this.btnSpecialGroups.TabIndex = 12;
+            this.btnSpecialGroups.Text = "Общая группа";
+            this.btnSpecialGroups.UseVisualStyleBackColor = true;
             // 
             // btnUserAnanas
             // 
@@ -298,15 +295,6 @@
             this.vScrollBar1.Size = new System.Drawing.Size(15, 459);
             this.vScrollBar1.TabIndex = 1;
             // 
-            // btnSpecialGroups
-            // 
-            this.btnSpecialGroups.Location = new System.Drawing.Point(0, 6);
-            this.btnSpecialGroups.Name = "btnSpecialGroups";
-            this.btnSpecialGroups.Size = new System.Drawing.Size(177, 32);
-            this.btnSpecialGroups.TabIndex = 12;
-            this.btnSpecialGroups.Text = "Общая группа";
-            this.btnSpecialGroups.UseVisualStyleBackColor = true;
-            // 
             // FormClient
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -318,6 +306,7 @@
             this.Controls.Add(this.buttonPlayGame);
             this.Name = "FormClient";
             this.Text = "Клиент";
+            this.Load += new System.EventHandler(this.FormClient_Load);
             this.panelUsers.ResumeLayout(false);
             this.panelChats.ResumeLayout(false);
             this.panelChats.PerformLayout();
@@ -340,7 +329,6 @@
         private System.Windows.Forms.Button btnUserDenden;
         private System.Windows.Forms.Button btnUserPagan;
         private System.Windows.Forms.Button btnUserKrs;
-        private System.Windows.Forms.Button btnUserPavPav;
         private System.Windows.Forms.Button btnUserAnanas;
         private System.Windows.Forms.Button btnUserVld;
         private System.Windows.Forms.Button buttonUserUSF;

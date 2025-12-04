@@ -9,4 +9,3 @@ C:\Users\User\Documents\TOP-Messenger\TOP Messenger\bin\Debug\TOP Messenger.pdb
 C:\Users\User\Documents\TOP-Messenger\TOP Messenger\obj\Debug\TOP_Messenger.FormRegistration.resources
 C:\Users\User\Documents\TOP-Messenger\TOP Messenger\obj\Debug\TOP Messenger.exe
 C:\Users\User\Documents\TOP-Messenger\TOP Messenger\obj\Debug\TOP Messenger.pdb
-C:\Users\User\Documents\TOP-Messenger\TOP Messenger\obj\Debug\TOP Messenger.exe.config

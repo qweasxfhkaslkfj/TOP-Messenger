@@ -86,6 +86,7 @@
             this.buttonVhod.TabIndex = 5;
             this.buttonVhod.Text = "Войти";
             this.buttonVhod.UseVisualStyleBackColor = true;
+            this.buttonVhod.Click += new System.EventHandler(this.buttonVhod_Click);
             // 
             // buttonZahodGosta
             // 
@@ -95,6 +96,7 @@
             this.buttonZahodGosta.TabIndex = 6;
             this.buttonZahodGosta.Text = "Войти как гость";
             this.buttonZahodGosta.UseVisualStyleBackColor = true;
+            this.buttonZahodGosta.Click += new System.EventHandler(this.buttonZahodGosta_Click);
             // 
             // FormRegistration
             // 

@@ -1,30 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq.Expressions;
 
 namespace TOP_Messenger
 {
     public class Registration
     {
-        public static bool isGuest = false;
-        public static bool isServer = false;
-        public static string login = "";
+        public static string CurrentLogin { get; private set; } = "";
+        public static bool IsGuest { get; private set; } = false;
+        public static bool IsServer { get; private set; } = false;
+
+        public static string CurrentRole
+        {
+            get
+            {
+                if (IsServer) return "Server";
+                if (IsGuest) return "Guest";
+                return "User";
+            }
+        }
 
         private Dictionary<string, string> usersLog;
-        private Dictionary<string, string> adminLog;
+        private const string ServerAdminLogin = "server";
+        private const string AdminPassword = "pAv0Pav183";
 
         public Registration()
         {
             usersLog = new Dictionary<string, string>();
-            adminLog = new Dictionary<string, string>();
-
             LoginUser();
-            LoginAdmin();
         }
 
-        public void LoginUser()
+        private void LoginUser()
         {
             usersLog.Add("krs333", "krs123");
             usersLog.Add("Pagan821", "ars123");
@@ -39,63 +45,122 @@ namespace TOP_Messenger
             usersLog.Add("ananas", "nast123");
         }
 
-        public void LoginAdmin()
+        /*public void LoginAdmin()
         {
             adminLog.Add("server", "pAv0Pav183");
-        }
+        }*/
 
-        //Проверка на админа
-        /*public void CheckLoginAndPassword(string login, string password)
+        public RegistrationResult CheckLoginAndPassword(string login, string password)
         {
-            if (string.IsNullOrWhiteSpace(login))
+            // Сбрасываем предыдущую сессию
+            ResetSession();
+
+            if (string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(password))
             {
-                return new ValidationResult
+                return new RegistrationResult
                 {
                     IsValid = false,
-                    ErrorMessage = "Логин не может быть пустым"
                 };
             }
 
-            if (string.IsNullOrWhiteSpace(password))
-            {
-                return new ValidationResult
-                {
-                    IsValid = false,
-                    ErrorMessage = "Пароль не может быть пустым"
-                };
-            }
-
-            // Проверка учетных данных
+            // Проверка сервера
             if (login == ServerAdminLogin && password == AdminPassword)
             {
-                // Серверный администратор
-                return new ValidationResult
+                CurrentLogin = login;
+                IsServer = true;
+                IsGuest = false;
+
+                return new RegistrationResult
                 {
                     IsValid = true,
+                    Login = login,
                     IsServer = true,
-                    UserRole = "ServerAdmin"
+                    IsGuest = false
                 };
             }
-            else if (login == AdminLogin && password == AdminPassword)
+
+            // Проверка обычных пользователей
+            if (usersLog.ContainsKey(login) && usersLog[login] == password)
             {
-                // Обычный администратор
-                return new ValidationResult
+                CurrentLogin = login;
+                IsGuest = false;
+                IsServer = false;
+
+                return new RegistrationResult
                 {
                     IsValid = true,
+                    Login = login,
                     IsServer = false,
-                    UserRole = "Admin"
+                    IsGuest = false
                 };
             }
-            else
+
+            // Неверные учетные данные
+            return new RegistrationResult
             {
-                // Проверка для обычных пользователей (можно добавить базу данных)
-                // В этом примере просто блокируем вход
-                return new ValidationResult
+                IsValid = false
+            };
+        }
+
+
+        public RegistrationResult CheckGuestLogin(string login)
+        {
+            ResetSession();
+
+            if (string.IsNullOrWhiteSpace(login))
+            {
+                return new RegistrationResult
                 {
-                    IsValid = false,
-                    ErrorMessage = "Неверный логин или пароль"
+                    IsValid = false
                 };
             }
-        }*/
+
+            /*if (login == ServerAdminLogin)
+            {
+                return new RegistrationResult
+                {
+                    IsValid = false
+                };
+            }
+
+            if (usersLog.ContainsKey(login))
+            {
+                return new RegistrationResult
+                {
+                    IsValid = false
+                };
+            }*/
+
+            CurrentLogin = login;
+            IsGuest = true;
+            IsServer = false;
+
+            return new RegistrationResult
+            {
+                IsValid = true,
+                Login = login,
+                IsGuest = true
+            };
+        }
+
+        private void ResetSession()
+        {
+            CurrentLogin = "";
+            IsGuest = false;
+            IsServer = false;
+        }
+
+        // Метод для проверки текущей роли (для других форм)
+        public static bool IsCurrentUserServer() => IsServer;
+        public static bool IsCurrentUserGuest() => IsGuest;
+        public static bool IsCurrentUserRegular() => !IsGuest && !IsServer;
+        public static string GetCurrentLogin() => CurrentLogin;
+    }
+    public class RegistrationResult
+    {
+        public bool IsValid { get; set; }
+        public bool IsGuest { get; set; }
+        public bool IsServer { get; set; }
+        public string Login { get; set; }
     }
 }

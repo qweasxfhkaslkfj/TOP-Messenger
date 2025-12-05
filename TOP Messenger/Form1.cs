@@ -51,7 +51,7 @@ namespace TOP_Messenger
                 };
 
                 // Сервер запускается на указанном IP
-                string localIP = "192.168.88.145";
+                string localIP = "192.168.88.128";
                 serverIP = localIP;
                 chatServer.Start(localIP, serverPort);
                 AddServerLog($"Сервер запущен на {localIP}:{serverPort}");

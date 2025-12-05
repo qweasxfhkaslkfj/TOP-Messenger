@@ -7,7 +7,7 @@ using System.Windows.Forms;
 
 namespace TOP_Messenger
 {
-   
+
     public partial class FormClient : Form
     {
         private ChatServer chatServer;
@@ -16,7 +16,7 @@ namespace TOP_Messenger
         private StreamWriter writer;
         private Thread receiveThread;
         private bool isConnected = false;
-        private string serverIP = "127.0.0.1";
+        private string serverIP = "192.168.88.145"; // <- ИЗМЕНЕНО
         private int serverPort = 8888;
 
         public FormClient()
@@ -51,7 +51,8 @@ namespace TOP_Messenger
                     }
                 };
 
-                string localIP = Registration.GetLocalIPAddress();
+                // Сервер запускается на указанном IP
+                string localIP = "192.168.88.145"; // <- ИЗМЕНЕНО
                 serverIP = localIP;
                 chatServer.Start(localIP, serverPort);
                 AddServerLog($"Сервер запущен на {localIP}:{serverPort}");
@@ -60,6 +61,7 @@ namespace TOP_Messenger
             }
         }
 
+        // Остальной код без изменений...
         private void AddServerLog(string message)
         {
             listBoxChat.Items.Add($"[SERVER]: {message}");
@@ -155,7 +157,7 @@ namespace TOP_Messenger
             }
             catch (Exception ex)
             {
-                AddChatMessage($"Ошибка подключения: {ex.Message}");
+                MessageBox.Show($"Ошибка подключения: {ex.Message}");
                 isConnected = false;
             }
         }

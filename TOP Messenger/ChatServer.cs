@@ -23,7 +23,6 @@ namespace TOP_Messenger
             Reader = new StreamReader(stream, Encoding.Unicode);
             Writer = new StreamWriter(stream, Encoding.Unicode) { AutoFlush = true };
         }
-
         public void Close()
         {
             try { Reader?.Close(); } catch { }
@@ -73,7 +72,6 @@ namespace TOP_Messenger
                 _isRunning = false;
             }
         }
-
         public void Stop()
         {
             if (!_isRunning) return;
@@ -149,7 +147,6 @@ namespace TOP_Messenger
                 }
             }
         }
-
         private void HandleClient(ClientConnection clientConn)
         {
             string currentClientName = clientConn.ClientName;
@@ -166,7 +163,7 @@ namespace TOP_Messenger
                 }
 
                 BroadcastMessage($"[{currentClientName} подключился к чату]", null);
-                MessageReceived?.Invoke($"[{currentClientName} подключился к чату]");
+                //MessageReceived?.Invoke($"[{currentClientName} подключился к чату]");
 
                 string message;
                 while (_isRunning && (message = clientConn.Reader.ReadLine()) != null)
@@ -181,7 +178,7 @@ namespace TOP_Messenger
 
                     string formattedMessage = $"[{currentClientName}]: {message}";
                     LogMessage(formattedMessage);
-                    MessageReceived?.Invoke(formattedMessage);
+                    //MessageReceived?.Invoke(formattedMessage);
                     SendMessageToOthers(formattedMessage, clientConn);
                 }
             }
@@ -208,20 +205,18 @@ namespace TOP_Messenger
 
                 string disconnectMessage = $"[{currentClientName} покинул чат]";
                 BroadcastMessage(disconnectMessage, null);
-                MessageReceived?.Invoke(disconnectMessage);
+                //MessageReceived?.Invoke(disconnectMessage);
 
                 LogMessage($"[{currentClientName}] отключен.");
             }
         }
-
         public void SendMessageToAll(string message)
         {
             if (!_isRunning) return;
 
             BroadcastMessage(message, null);
-            MessageReceived?.Invoke(message);
+            //MessageReceived?.Invoke(message);
         }
-
         private void BroadcastMessage(string message, ClientConnection sender)
         {
             List<ClientConnection> clientsToCleanup = new List<ClientConnection>();
@@ -250,12 +245,10 @@ namespace TOP_Messenger
                 }
             }
         }
-
         private void SendMessageToOthers(string message, ClientConnection sender)
         {
             BroadcastMessage(message, sender);
         }
-
         private void LogMessage(string message)
         {
             MessageLogged?.Invoke(message);

@@ -159,7 +159,6 @@ namespace TOP_Messenger
                 isConnected = false;
             }
         }
-
         private void ReceiveMessages()
         {
             try
@@ -168,6 +167,11 @@ namespace TOP_Messenger
                 {
                     string message = reader.ReadLine();
                     if (message == null) break;
+
+                    //if (Registration.IsCurrentUserServer())
+                    //{
+
+                    //}
 
                     if (InvokeRequired)
                     {
@@ -215,14 +219,6 @@ namespace TOP_Messenger
             {
                 writer.WriteLine(message);
 
-                // Если мы сервер, также показываем своё сообщение локально
-                if (Registration.IsCurrentUserServer())
-                {
-                    string formattedMessage = $"[{Registration.GetCurrentLogin()}]: {message}";
-                    AddChatMessage(formattedMessage);
-                    chatServer?.SendMessageToAll(formattedMessage);
-                }
-
                 textBoxMessage.Clear();
                 textBoxMessage.Focus();
             }
@@ -232,6 +228,7 @@ namespace TOP_Messenger
                 isConnected = false;
             }
         }
+
         private void FormClient_Load(object sender, EventArgs e)
         {
             if (!Registration.IsCurrentUserServer())
@@ -271,7 +268,6 @@ namespace TOP_Messenger
         {
             SendMessageToServer();
         }
-
         private void textBoxMessage_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter && !e.Shift)

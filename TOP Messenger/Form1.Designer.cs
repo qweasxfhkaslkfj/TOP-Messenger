@@ -49,8 +49,6 @@
             this.listBoxChat = new System.Windows.Forms.ListBox();
             this.panelHistoryFiles = new System.Windows.Forms.Panel();
             this.Files = new System.Windows.Forms.Label();
-            this.buttonDownload = new System.Windows.Forms.Button();
-            this.labelNameFiles = new System.Windows.Forms.Label();
             this.vScrollBar1 = new System.Windows.Forms.VScrollBar();
             this.panelUsers.SuspendLayout();
             this.panelChats.SuspendLayout();
@@ -60,7 +58,7 @@
             // buttonPlayGame
             // 
             this.buttonPlayGame.Enabled = false;
-            this.buttonPlayGame.Location = new System.Drawing.Point(700, 12);
+            this.buttonPlayGame.Location = new System.Drawing.Point(700, 6);
             this.buttonPlayGame.Name = "buttonPlayGame";
             this.buttonPlayGame.Size = new System.Drawing.Size(158, 41);
             this.buttonPlayGame.TabIndex = 0;
@@ -211,16 +209,16 @@
             this.panelChats.Controls.Add(this.buttonFile);
             this.panelChats.Controls.Add(this.textBoxMessage);
             this.panelChats.Controls.Add(this.listBoxChat);
-            this.panelChats.Location = new System.Drawing.Point(196, 3);
+            this.panelChats.Location = new System.Drawing.Point(196, 6);
             this.panelChats.Name = "panelChats";
-            this.panelChats.Size = new System.Drawing.Size(498, 557);
+            this.panelChats.Size = new System.Drawing.Size(498, 554);
             this.panelChats.TabIndex = 2;
             // 
             // buttonSend
             // 
-            this.buttonSend.Location = new System.Drawing.Point(420, 513);
+            this.buttonSend.Location = new System.Drawing.Point(420, 531);
             this.buttonSend.Name = "buttonSend";
-            this.buttonSend.Size = new System.Drawing.Size(75, 35);
+            this.buttonSend.Size = new System.Drawing.Size(75, 20);
             this.buttonSend.TabIndex = 3;
             this.buttonSend.Text = "Отправить";
             this.buttonSend.UseVisualStyleBackColor = true;
@@ -228,19 +226,18 @@
             // 
             // buttonFile
             // 
-            this.buttonFile.Location = new System.Drawing.Point(3, 513);
+            this.buttonFile.Location = new System.Drawing.Point(3, 531);
             this.buttonFile.Name = "buttonFile";
-            this.buttonFile.Size = new System.Drawing.Size(71, 35);
+            this.buttonFile.Size = new System.Drawing.Size(71, 20);
             this.buttonFile.TabIndex = 2;
             this.buttonFile.Text = "Файл";
             this.buttonFile.UseVisualStyleBackColor = true;
             // 
             // textBoxMessage
             // 
-            this.textBoxMessage.Location = new System.Drawing.Point(80, 513);
-            this.textBoxMessage.Multiline = true;
+            this.textBoxMessage.Location = new System.Drawing.Point(80, 531);
             this.textBoxMessage.Name = "textBoxMessage";
-            this.textBoxMessage.Size = new System.Drawing.Size(334, 35);
+            this.textBoxMessage.Size = new System.Drawing.Size(334, 20);
             this.textBoxMessage.TabIndex = 1;
             // 
             // listBoxChat
@@ -248,46 +245,26 @@
             this.listBoxChat.FormattingEnabled = true;
             this.listBoxChat.Location = new System.Drawing.Point(3, 3);
             this.listBoxChat.Name = "listBoxChat";
-            this.listBoxChat.Size = new System.Drawing.Size(492, 498);
+            this.listBoxChat.Size = new System.Drawing.Size(492, 524);
             this.listBoxChat.TabIndex = 0;
             // 
             // panelHistoryFiles
             // 
             this.panelHistoryFiles.Controls.Add(this.Files);
-            this.panelHistoryFiles.Controls.Add(this.buttonDownload);
-            this.panelHistoryFiles.Controls.Add(this.labelNameFiles);
             this.panelHistoryFiles.Controls.Add(this.vScrollBar1);
-            this.panelHistoryFiles.Location = new System.Drawing.Point(700, 75);
+            this.panelHistoryFiles.Location = new System.Drawing.Point(700, 53);
             this.panelHistoryFiles.Name = "panelHistoryFiles";
-            this.panelHistoryFiles.Size = new System.Drawing.Size(158, 485);
+            this.panelHistoryFiles.Size = new System.Drawing.Size(158, 507);
             this.panelHistoryFiles.TabIndex = 3;
             // 
             // Files
             // 
             this.Files.AutoSize = true;
-            this.Files.Location = new System.Drawing.Point(54, 0);
+            this.Files.Location = new System.Drawing.Point(57, 0);
             this.Files.Name = "Files";
             this.Files.Size = new System.Drawing.Size(44, 13);
             this.Files.TabIndex = 4;
             this.Files.Text = "Файлы";
-            // 
-            // buttonDownload
-            // 
-            this.buttonDownload.Location = new System.Drawing.Point(6, 57);
-            this.buttonDownload.Name = "buttonDownload";
-            this.buttonDownload.Size = new System.Drawing.Size(75, 23);
-            this.buttonDownload.TabIndex = 3;
-            this.buttonDownload.Text = "Скачать";
-            this.buttonDownload.UseVisualStyleBackColor = true;
-            // 
-            // labelNameFiles
-            // 
-            this.labelNameFiles.AutoSize = true;
-            this.labelNameFiles.Location = new System.Drawing.Point(3, 32);
-            this.labelNameFiles.Name = "labelNameFiles";
-            this.labelNameFiles.Size = new System.Drawing.Size(35, 13);
-            this.labelNameFiles.TabIndex = 2;
-            this.labelNameFiles.Text = "label1";
             // 
             // vScrollBar1
             // 
@@ -305,8 +282,10 @@
             this.Controls.Add(this.panelChats);
             this.Controls.Add(this.panelUsers);
             this.Controls.Add(this.buttonPlayGame);
+            this.MaximumSize = new System.Drawing.Size(886, 611);
+            this.MinimumSize = new System.Drawing.Size(886, 611);
             this.Name = "FormClient";
-            this.Text = "Клиент";
+            this.Text = "TOP Messenger";
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.FormClient_FormClosed);
             this.Load += new System.EventHandler(this.FormClient_Load);
             this.panelUsers.ResumeLayout(false);
@@ -339,9 +318,7 @@
         private System.Windows.Forms.Button btnUserTabeer;
         private System.Windows.Forms.Button btnUserLady_Bug;
         private System.Windows.Forms.Button btnUserCat_Noir;
-        private System.Windows.Forms.Label labelNameFiles;
         private System.Windows.Forms.VScrollBar vScrollBar1;
-        private System.Windows.Forms.Button buttonDownload;
         private System.Windows.Forms.Label Files;
         private System.Windows.Forms.Button btnSpecialGroups;
     }

@@ -34,3 +34,15 @@ C:\Users\User\Desktop\РПО\TOP-Messenger\TOP Messenger\obj\Debug\TOP Messenger
 C:\Users\User\Desktop\РПО\TOP-Messenger\TOP Messenger\obj\Debug\TOP Messenger.exe
 C:\Users\User\Desktop\РПО\TOP-Messenger\TOP Messenger\obj\Debug\TOP Messenger.pdb
 >>>>>>> 4243ddf10f6bc986f0d9328bea8d628fbc060ab6
+C:\Users\User\source\TOP Messenger\TOP-Messenger\TOP Messenger\bin\Debug\TOP Messenger.exe.config
+C:\Users\User\source\TOP Messenger\TOP-Messenger\TOP Messenger\bin\Debug\TOP Messenger.exe
+C:\Users\User\source\TOP Messenger\TOP-Messenger\TOP Messenger\bin\Debug\TOP Messenger.pdb
+C:\Users\User\source\TOP Messenger\TOP-Messenger\TOP Messenger\obj\Debug\TOP Messenger.csproj.AssemblyReference.cache
+C:\Users\User\source\TOP Messenger\TOP-Messenger\TOP Messenger\obj\Debug\TOP Messenger.exe.config
+C:\Users\User\source\TOP Messenger\TOP-Messenger\TOP Messenger\obj\Debug\TOP_Messenger.FormClient.resources
+C:\Users\User\source\TOP Messenger\TOP-Messenger\TOP Messenger\obj\Debug\TOP_Messenger.FormRegistration.resources
+C:\Users\User\source\TOP Messenger\TOP-Messenger\TOP Messenger\obj\Debug\TOP_Messenger.Properties.Resources.resources
+C:\Users\User\source\TOP Messenger\TOP-Messenger\TOP Messenger\obj\Debug\TOP Messenger.csproj.GenerateResource.cache
+C:\Users\User\source\TOP Messenger\TOP-Messenger\TOP Messenger\obj\Debug\TOP Messenger.csproj.CoreCompileInputs.cache
+C:\Users\User\source\TOP Messenger\TOP-Messenger\TOP Messenger\obj\Debug\TOP Messenger.exe
+C:\Users\User\source\TOP Messenger\TOP-Messenger\TOP Messenger\obj\Debug\TOP Messenger.pdb

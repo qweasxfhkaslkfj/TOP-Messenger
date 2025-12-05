@@ -239,6 +239,7 @@
             this.textBoxMessage.Name = "textBoxMessage";
             this.textBoxMessage.Size = new System.Drawing.Size(334, 20);
             this.textBoxMessage.TabIndex = 1;
+            this.textBoxMessage.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxMessage_KeyDown);
             // 
             // listBoxChat
             // 

@@ -22,6 +22,11 @@ namespace TOP_Messenger
 
         private void buttonVhod_Click(object sender, EventArgs e)
         {
+            Enter();
+        }
+
+        private void Enter()
+        {
             if (!textBoxPassword.Enabled)
             {
                 var result = registration.CheckGuestLogin(textBoxLogin.Text);
@@ -54,6 +59,32 @@ namespace TOP_Messenger
                 {
                     MessageBox.Show("Error!");
                 }
+            }
+        }
+
+        private void textBoxLogin_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter && !e.Shift)
+            {
+                if (!textBoxPassword.Enabled)
+                {
+                    Enter();
+                    e.SuppressKeyPress = true;
+                }
+                else
+                {
+                    textBoxPassword.Focus();
+                    e.SuppressKeyPress = true;
+                }
+            }
+        }
+
+        private void textBoxPassword_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter && !e.Shift)
+            {
+                Enter();
+                e.SuppressKeyPress = true;
             }
         }
     }

@@ -7,7 +7,6 @@ using System.Windows.Forms;
 
 namespace TOP_Messenger
 {
-
     public partial class FormClient : Form
     {
         private ChatServer chatServer;
@@ -16,7 +15,7 @@ namespace TOP_Messenger
         private StreamWriter writer;
         private Thread receiveThread;
         private bool isConnected = false;
-        private string serverIP = "192.168.88.145"; // <- ИЗМЕНЕНО
+        private string serverIP = "192.168.88.145";
         private int serverPort = 8888;
 
         public FormClient()
@@ -52,7 +51,7 @@ namespace TOP_Messenger
                 };
 
                 // Сервер запускается на указанном IP
-                string localIP = "192.168.88.145"; // <- ИЗМЕНЕНО
+                string localIP = "192.168.88.145";
                 serverIP = localIP;
                 chatServer.Start(localIP, serverPort);
                 AddServerLog($"Сервер запущен на {localIP}:{serverPort}");
@@ -61,15 +60,21 @@ namespace TOP_Messenger
             }
         }
 
-        // Остальной код без изменений...
         private void AddServerLog(string message)
         {
-            listBoxChat.Items.Add($"[SERVER]: {message}");
             listBoxChat.TopIndex = listBoxChat.Items.Count - 1;
         }
+
         private void AddChatMessage(string message)
         {
             listBoxChat.Items.Add(message);
+            listBoxChat.TopIndex = listBoxChat.Items.Count - 1;
+        }
+
+        private void AddOwnMessage(string message)
+        {
+            string ownMessage = $"[Вы]: {message}";
+            listBoxChat.Items.Add(ownMessage);
             listBoxChat.TopIndex = listBoxChat.Items.Count - 1;
         }
 
@@ -109,6 +114,7 @@ namespace TOP_Messenger
 
             panelHistoryFiles.Controls.Add(filePanel);
         }
+
         private void SetupInterfaceByRole()
         {
             bool isServer = Registration.IsCurrentUserServer();
@@ -161,6 +167,7 @@ namespace TOP_Messenger
                 isConnected = false;
             }
         }
+
         private void ReceiveMessages()
         {
             try
@@ -169,11 +176,6 @@ namespace TOP_Messenger
                 {
                     string message = reader.ReadLine();
                     if (message == null) break;
-
-                    //if (Registration.IsCurrentUserServer())
-                    //{
-
-                    //}
 
                     if (InvokeRequired)
                     {
@@ -219,6 +221,10 @@ namespace TOP_Messenger
 
             try
             {
+                // Добавляем сообщение локально (клиент видит его сразу)
+                AddOwnMessage(message);
+
+                // Отправляем на сервер для рассылки другим клиентам
                 writer.WriteLine(message);
 
                 textBoxMessage.Clear();
@@ -238,7 +244,7 @@ namespace TOP_Messenger
                 ConnectToServer();
             }
         }
-        // ЁМАЁ, Альберт, ты не мог додуматься ЗАКРЫТЬ форму, чтобы она не висела фоном???
+
         private void FormClient_FormClosed(object sender, FormClosedEventArgs e)
         {
             if (isConnected)
@@ -265,11 +271,11 @@ namespace TOP_Messenger
             Application.Exit();
         }
 
-        // Обработчики событий для кнопок
         private void buttonSend_Click(object sender, EventArgs e)
         {
             SendMessageToServer();
         }
+
         private void textBoxMessage_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter && !e.Shift)

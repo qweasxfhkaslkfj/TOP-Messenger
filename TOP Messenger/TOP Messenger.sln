@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TOP Messenger", "TOP Messen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EncryptionTesting", "..\EncryptionTesting\EncryptionTesting.csproj", "{63C8135E-E9BB-40EC-A17B-3E5C185DC5C2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DecryptionTests", "..\DecryptionTests\DecryptionTests.csproj", "{F579DB96-E71D-44B8-97E8-3C01878655C0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{63C8135E-E9BB-40EC-A17B-3E5C185DC5C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63C8135E-E9BB-40EC-A17B-3E5C185DC5C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{63C8135E-E9BB-40EC-A17B-3E5C185DC5C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F579DB96-E71D-44B8-97E8-3C01878655C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F579DB96-E71D-44B8-97E8-3C01878655C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F579DB96-E71D-44B8-97E8-3C01878655C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F579DB96-E71D-44B8-97E8-3C01878655C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -284,5 +284,12 @@ namespace TOP_Messenger
                 SendMessageToServer();
             }
         }
+
+        private void buttonPlayGame_Click(object sender, EventArgs e)
+        {
+            FormGameSelection formGameSelection = new FormGameSelection();
+            formGameSelection.ShowDialog();
+            this.Hide();
+        }
     }
 }

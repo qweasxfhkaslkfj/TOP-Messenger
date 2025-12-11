@@ -53,11 +53,23 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="FormGameSelection.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormGameSelection.Designer.cs">
+      <DependentUpon>FormGameSelection.cs</DependentUpon>
+    </Compile>
     <Compile Include="FormRegistration.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="FormRegistration.Designer.cs">
       <DependentUpon>FormRegistration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormTicTacToe.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormTicTacToe.Designer.cs">
+      <DependentUpon>FormTicTacToe.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -65,8 +77,14 @@
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="FormGameSelection.resx">
+      <DependentUpon>FormGameSelection.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FormRegistration.resx">
       <DependentUpon>FormRegistration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormTicTacToe.resx">
+      <DependentUpon>FormTicTacToe.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

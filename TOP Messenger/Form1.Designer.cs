@@ -64,6 +64,7 @@
             this.buttonPlayGame.TabIndex = 0;
             this.buttonPlayGame.Text = "Играть";
             this.buttonPlayGame.UseVisualStyleBackColor = true;
+            this.buttonPlayGame.Click += new System.EventHandler(this.buttonPlayGame_Click);
             // 
             // panelUsers
             // 

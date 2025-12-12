@@ -1,19 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace TOP_Messenger
 {
     public class ClientConnection
     {
         public TcpClient Client { get; private set; }
+        public NetworkStream Stream { get; set; }
         public StreamWriter Writer { get; private set; }
         public StreamReader Reader { get; private set; }
         public string ClientName { get; set; }
+        public Color ClientColor { get; set; }
 
         public ClientConnection(TcpClient client, string tempId)
         {
@@ -23,6 +27,7 @@ namespace TOP_Messenger
             Reader = new StreamReader(stream, Encoding.Unicode);
             Writer = new StreamWriter(stream, Encoding.Unicode) { AutoFlush = true };
         }
+
         public void Close()
         {
             try { Reader?.Close(); } catch { }
@@ -36,13 +41,42 @@ namespace TOP_Messenger
         private TcpListener _server;
         private List<ClientConnection> _connectedClients = new List<ClientConnection>();
         private readonly object _clientsLock = new object();
+        private readonly object _logFileLock = new object();
         private int _clientCounter = 0;
         private Thread _listenThread;
         private bool _isRunning = false;
+        private string _messageLogFile;
 
         public event Action<string> MessageLogged;
-        public event Action<string> MessageReceived;
+        public bool IsRunning => _isRunning;
 
+        // Конструктор - инициализируем путь к файлу истории
+        public ChatServer()
+        {
+            // Файл истории будет находиться на компьютере сервера
+            _messageLogFile = GetServerHistoryFilePath();
+        }
+
+        // Метод для получения пути к файлу истории на сервере
+        private string GetServerHistoryFilePath()
+        {
+            try
+            {
+                string appDirectory = Application.StartupPath;
+                string dataDirectory = Path.Combine(appDirectory, "ChatData");
+
+                if (!Directory.Exists(dataDirectory))
+                {
+                    Directory.CreateDirectory(dataDirectory);
+                }
+
+                return Path.Combine(dataDirectory, "chat_history.txt");
+            }
+            catch (Exception)
+            {
+                return "chat_history.txt"; // путь по умолчанию
+            }
+        }
 
         public void Start(string ipAddress, int port)
         {
@@ -59,6 +93,9 @@ namespace TOP_Messenger
                 _server.Start();
                 _isRunning = true;
 
+                // Создаем файл лога только на сервере
+                InitializeLogFile();
+
                 LogMessage($"Сервер запущен на {ipAddress}:{port}");
                 LogMessage("Ожидание подключений...");
 
@@ -72,6 +109,66 @@ namespace TOP_Messenger
                 _isRunning = false;
             }
         }
+
+        private void InitializeLogFile()
+        {
+            lock (_logFileLock)
+            {
+                try
+                {
+                    if (!File.Exists(_messageLogFile))
+                    {
+                        using (StreamWriter sw = File.CreateText(_messageLogFile))
+                        {
+                            sw.WriteLine($"=== Начало лога чата {DateTime.Now} ===");
+                            sw.WriteLine($"Сервер запущен");
+                            sw.WriteLine();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogMessage($"Ошибка создания файла лога: {ex.Message}");
+                }
+            }
+        }
+
+        // Метод для сохранения сообщения в файл истории на сервере
+        public void SaveMessageToServerLog(string message, string sender = null)
+        {
+            lock (_logFileLock)
+            {
+                try
+                {
+                    if (!File.Exists(_messageLogFile))
+                    {
+                        InitializeLogFile();
+                    }
+
+                    string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+                    string messageToSave;
+
+                    if (string.IsNullOrEmpty(sender))
+                    {
+                        messageToSave = $"[{timestamp}] {message}";
+                    }
+                    else
+                    {
+                        messageToSave = $"[{timestamp}] [{sender}] {message}";
+                    }
+
+                    using (StreamWriter sw = File.AppendText(_messageLogFile))
+                    {
+                        sw.WriteLine(messageToSave);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogMessage($"Ошибка сохранения сообщения в файл сервера: {ex.Message}");
+                }
+            }
+        }
+
         public void Stop()
         {
             if (!_isRunning) return;
@@ -81,6 +178,7 @@ namespace TOP_Messenger
             try
             {
                 _server?.Stop();
+                SaveMessageToServerLog("Сервер остановлен", "Система");
                 LogMessage("Сервер остановлен.");
             }
             catch (Exception ex)
@@ -103,8 +201,6 @@ namespace TOP_Messenger
             }
         }
 
-        public bool IsRunning => _isRunning;
-
         private void ListenForClients()
         {
             try
@@ -114,7 +210,6 @@ namespace TOP_Messenger
                     TcpClient client = _server.AcceptTcpClient();
                     Interlocked.Increment(ref _clientCounter);
                     string tempClientId = $"Guest#{_clientCounter}";
-                    LogMessage($"Подключен новый клиент (временный ID: {tempClientId})");
 
                     ClientConnection clientConn = new ClientConnection(client, tempClientId);
 
@@ -147,24 +242,49 @@ namespace TOP_Messenger
                 }
             }
         }
+
         private void HandleClient(ClientConnection clientConn)
         {
             string currentClientName = clientConn.ClientName;
+            Color clientColor = Color.Black;
 
             try
             {
-                // Первое сообщение от клиента - его имя
+                // Получаем логин пользователя от клиента
                 string initialMessage = clientConn.Reader.ReadLine();
                 if (!string.IsNullOrEmpty(initialMessage))
                 {
                     currentClientName = initialMessage.Trim();
                     clientConn.ClientName = currentClientName;
-                    LogMessage($"Клиент {currentClientName} зарегистрировал имя.");
+
+                    // Определяем цвет для пользователя
+                    if (currentClientName.StartsWith("Guest#"))
+                    {
+                        clientColor = GetRandomDarkBrightColor();
+                    }
+                    else
+                    {
+                        clientColor = GetUserColorByName(currentClientName);
+                    }
+
+                    clientConn.ClientColor = clientColor;
                 }
 
-                BroadcastMessage($"[{currentClientName} подключился к чату]", null);
-                //MessageReceived?.Invoke($"[{currentClientName} подключился к чату]");
+                // Отправляем цвет пользователю
+                clientConn.Writer.WriteLine($"YOUR_COLOR:{clientColor.ToArgb()}");
+                clientConn.Writer.Flush();
 
+                // Отправляем всем сообщение о подключении нового пользователя
+                string connectMessage = $"{currentClientName} подключился к чату";
+                BroadcastColoredMessage(connectMessage, clientColor);
+
+                // Сохраняем в историю на сервере
+                SaveMessageToServerLog(connectMessage, "Система");
+
+                // Отправляем историю сообщений новому пользователю
+                SendChatHistoryToClient(clientConn);
+
+                // Основной цикл обработки сообщений от клиента
                 string message;
                 while (_isRunning && (message = clientConn.Reader.ReadLine()) != null)
                 {
@@ -176,19 +296,29 @@ namespace TOP_Messenger
                         break;
                     }
 
-                    string formattedMessage = $"[{currentClientName}]: {message}";
-                    LogMessage(formattedMessage);
-                    //MessageReceived?.Invoke(formattedMessage);
-                    SendMessageToOthers(formattedMessage, clientConn);
+                    if (!string.IsNullOrEmpty(message))
+                    {
+                        // Сохраняем сообщение в истории на сервере
+                        SaveMessageToServerLog(message, currentClientName);
+
+                        // Отправляем сообщение всем остальным клиентам
+                        string coloredMessage = $"[{currentClientName}]: {message}";
+                        BroadcastColoredMessage(coloredMessage, clientColor, clientConn);
+                    }
                 }
+
+                // Сохраняем отключение в истории на сервере
+                SaveMessageToServerLog($"Пользователь {currentClientName} отключился", "Система");
             }
             catch (IOException)
             {
                 LogMessage($"[{currentClientName}] неожиданно отключился.");
+                SaveMessageToServerLog($"Неожиданное отключение: {currentClientName}", "Система");
             }
             catch (ObjectDisposedException)
             {
                 LogMessage($"[{currentClientName}] отключился (ресурсы освобождены).");
+                SaveMessageToServerLog($"Отключение: {currentClientName}", "Система");
             }
             catch (Exception ex)
             {
@@ -201,57 +331,169 @@ namespace TOP_Messenger
                     _connectedClients.Remove(clientConn);
                 }
 
+                // Отправляем сообщение об отключении
+                if (!string.IsNullOrEmpty(currentClientName))
+                {
+                    string disconnectMessage = $"{currentClientName} покинул чат";
+                    BroadcastColoredMessage(disconnectMessage, clientColor);
+                    SaveMessageToServerLog(disconnectMessage, "Система");
+                }
+
                 clientConn.Close();
-
-                string disconnectMessage = $"[{currentClientName} покинул чат]";
-                BroadcastMessage(disconnectMessage, null);
-                //MessageReceived?.Invoke(disconnectMessage);
-
                 LogMessage($"[{currentClientName}] отключен.");
             }
         }
-        public void SendMessageToAll(string message)
-        {
-            if (!_isRunning) return;
 
-            BroadcastMessage(message, null);
-            //MessageReceived?.Invoke(message);
+        private Color GetRandomDarkBrightColor()
+        {
+            Random random = new Random(Guid.NewGuid().GetHashCode());
+
+            Color[] guestColors = new Color[]
+            {
+                Color.DarkRed,
+                Color.DarkBlue,
+                Color.DarkGreen,
+                Color.DarkMagenta,
+                Color.DarkCyan,
+                Color.DarkOrange,
+                Color.DarkViolet,
+                Color.DarkSlateBlue,
+                Color.MidnightBlue,
+                Color.Maroon,
+                Color.Purple,
+                Color.Teal,
+                Color.Navy,
+                Color.OliveDrab,
+                Color.SaddleBrown,
+                Color.DarkSlateGray
+            };
+
+            return guestColors[random.Next(guestColors.Length)];
         }
-        private void BroadcastMessage(string message, ClientConnection sender)
-        {
-            List<ClientConnection> clientsToCleanup = new List<ClientConnection>();
 
+        private Color GetUserColorByName(string userName)
+        {
+            int hash = Math.Abs(userName.GetHashCode());
+
+            Color[] darkBrightColors = new Color[]
+            {
+                Color.DarkRed,
+                Color.DarkBlue,
+                Color.DarkGreen,
+                Color.DarkMagenta,
+                Color.DarkCyan,
+                Color.DarkOrange,
+                Color.DarkViolet,
+                Color.DarkSlateBlue,
+                Color.MidnightBlue,
+                Color.Maroon,
+                Color.Purple,
+                Color.Teal,
+                Color.Navy,
+                Color.OliveDrab,
+                Color.SaddleBrown,
+                Color.DarkSlateGray
+            };
+
+            int colorIndex = hash % darkBrightColors.Length;
+            return darkBrightColors[colorIndex];
+        }
+
+        // Отправка истории чата новому клиенту (с сервера)
+        private void SendChatHistoryToClient(ClientConnection clientConn)
+        {
+            try
+            {
+                if (File.Exists(_messageLogFile))
+                {
+                    string[] lines = File.ReadAllLines(_messageLogFile);
+                    int startIndex = Math.Max(0, lines.Length - 50); // Последние 50 сообщений
+
+                    for (int i = startIndex; i < lines.Length; i++)
+                    {
+                        // Пропускаем системные сообщения о сессиях
+                        if (!lines[i].Contains("=== Сессия") && !lines[i].Contains("=== Начало лога"))
+                        {
+                            clientConn.Writer.WriteLine($"HISTORY:{lines[i]}");
+                        }
+                    }
+                    clientConn.Writer.Flush();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"Ошибка отправки истории: {ex.Message}");
+            }
+        }
+
+        // Добавление отсутствующих методов для рассылки сообщений
+        private void BroadcastColoredMessage(string message, Color color)
+        {
+            string formattedMessage = $"COLOR:{color.ToArgb()}|{message}";
+            BroadcastMessage(formattedMessage);
+        }
+
+        private void BroadcastColoredMessage(string message, Color color, ClientConnection excludeClient)
+        {
+            string formattedMessage = $"COLOR:{color.ToArgb()}|{message}";
+            BroadcastMessage(formattedMessage, excludeClient);
+        }
+
+        private void BroadcastMessage(string message)
+        {
+            BroadcastMessage(message, null);
+        }
+
+        private void BroadcastMessage(string message, ClientConnection excludeClient)
+        {
             lock (_clientsLock)
             {
                 foreach (var client in _connectedClients)
                 {
-                    if (client == sender) continue;
+                    // Пропускаем исключенного клиента, если указан
+                    if (excludeClient != null && client == excludeClient)
+                        continue;
 
                     try
                     {
                         client.Writer.WriteLine(message);
+                        client.Writer.Flush();
                     }
-                    catch (Exception)
+                    catch
                     {
-                        clientsToCleanup.Add(client);
+                        // Игнорируем ошибки отправки
                     }
-                }
-
-                foreach (var client in clientsToCleanup)
-                {
-                    _connectedClients.Remove(client);
-                    client.Close();
-                    LogMessage($"Клиент {client.ClientName} удален из списка подключенных (неактивен).");
                 }
             }
         }
-        private void SendMessageToOthers(string message, ClientConnection sender)
-        {
-            BroadcastMessage(message, sender);
-        }
+
         private void LogMessage(string message)
         {
             MessageLogged?.Invoke(message);
+        }
+
+        // Метод для получения пути к файлу лога сервера
+        public string GetLogFilePath()
+        {
+            return _messageLogFile;
+        }
+
+        // Метод для очистки лога на сервере
+        public void ClearServerLog()
+        {
+            lock (_logFileLock)
+            {
+                try
+                {
+                    File.Delete(_messageLogFile);
+                    InitializeLogFile();
+                    LogMessage("Лог сообщений на сервере очищен");
+                }
+                catch (Exception ex)
+                {
+                    LogMessage($"Ошибка очистки лога на сервере: {ex.Message}");
+                }
+            }
         }
     }
 }

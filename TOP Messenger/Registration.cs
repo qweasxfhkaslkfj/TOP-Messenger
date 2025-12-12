@@ -153,7 +153,7 @@ namespace TOP_Messenger
                         return ipAddress;
                     }
                 }
-                return "127.0.0.1";
+                return "192.168.88.145";
             }
             catch (Exception)
             {
@@ -164,7 +164,7 @@ namespace TOP_Messenger
                     return fallbackIp;
                 }
 
-                return "127.0.0.1";
+                return "192.168.88.145";
             }
             finally
             {

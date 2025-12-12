@@ -600,8 +600,20 @@ namespace TOP_Messenger
             }
             else if (message.StartsWith("HISTORY:"))
             {
-                // Получаем историю с сервера
+                // Получаем историю с сервера (уже дешифрованную)
                 string historyMessage = message.Substring(8);
+
+                // Пробуем дешифровать на случай, если сервер не дешифровал
+                try
+                {
+                    // Проверяем, зашифровано ли сообщение
+                    if (IsEncryptedMessage(historyMessage))
+                    {
+                        historyMessage = DecryptMessageFromHistory(historyMessage);
+                    }
+                }
+                catch { }
+
                 AddChatMessageFromHistory(historyMessage);
             }
             else if (message.Contains("[ФАЙЛ от"))
@@ -616,6 +628,92 @@ namespace TOP_Messenger
                 AddChatMessage(message);
             }
         }
+
+        // Проверяет, зашифровано ли сообщение (по наличию зашифрованных символов)
+        private bool IsEncryptedMessage(string message)
+        {
+            // Проверяем наличие зашифрованных русских букв
+            // В шифре Цезаря со сдвигом 3: 
+            // 'а' → 'г', 'б' → 'д', 'в' → 'е', и т.д.
+            // Проверяем наличие характерных зашифрованных последовательностей
+
+            if (message.Contains("гд") || message.Contains("де") ||
+                message.Contains("еж") || message.Contains("жз"))
+            {
+                return true;
+            }
+
+            // Дополнительная проверка: если в сообщении есть русские буквы, 
+            // но они не образуют осмысленных слов
+            int russianLetterCount = 0;
+            int meaningfulWords = 0;
+
+            foreach (char c in message)
+            {
+                if (c >= 'а' && c <= 'я' || c >= 'А' && c <= 'Я')
+                {
+                    russianLetterCount++;
+                }
+            }
+
+            // Если много русских букв, но сообщение не содержит пробелов 
+            // и выглядит как случайный набор букв - вероятно зашифровано
+            if (russianLetterCount > 5 && !message.Contains(" ") &&
+                !message.Contains("подключился") && !message.Contains("покинул"))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        // Дешифровка сообщения из истории
+        private string DecryptMessageFromHistory(string encryptedLine)
+        {
+            try
+            {
+                // Формат строки: [timestamp] [sender] encrypted_message
+                // Или: [timestamp] encrypted_message (для системных)
+
+                if (encryptedLine.Contains("] ["))
+                {
+                    // Сообщение от пользователя
+                    int timestampEnd = encryptedLine.IndexOf("] ") + 2;
+                    int senderStart = encryptedLine.IndexOf("[", timestampEnd);
+                    int senderEnd = encryptedLine.IndexOf("]", senderStart) + 2;
+
+                    string timestampAndSender = encryptedLine.Substring(0, senderEnd);
+                    string encryptedMessage = encryptedLine.Substring(senderEnd).Trim();
+
+                    // Дешифруем сообщение
+                    string decryptedMessage = Encryption.Decrypt(encryptedMessage);
+
+                    return $"{timestampAndSender}{decryptedMessage}";
+                }
+                else if (encryptedLine.Contains("] "))
+                {
+                    // Системное сообщение
+                    int timestampEnd = encryptedLine.IndexOf("] ") + 2;
+                    string timestamp = encryptedLine.Substring(0, timestampEnd);
+                    string encryptedMessage = encryptedLine.Substring(timestampEnd).Trim();
+
+                    // Дешифруем сообщение
+                    string decryptedMessage = Encryption.Decrypt(encryptedMessage);
+
+                    return $"{timestamp}{decryptedMessage}";
+                }
+                else
+                {
+                    // Пробуем дешифровать всю строку
+                    return Encryption.Decrypt(encryptedLine);
+                }
+            }
+            catch (Exception)
+            {
+                return encryptedLine; // В случае ошибки возвращаем оригинал
+            }
+        }
+
 
         // Метод для добавления сообщений из истории сервера
         private void AddChatMessageFromHistory(string historyLine)
@@ -995,20 +1093,16 @@ namespace TOP_Messenger
                 // Только сервер имеет локальный файл истории
                 if (Registration.IsCurrentUserServer() && chatServer != null)
                 {
-                    string historyFile = chatServer.GetLogFilePath();
+                    var history = chatServer.LoadChatHistoryFromFile(100);
 
-                    if (File.Exists(historyFile))
+                    Console.WriteLine($"Загружено {history.Count} сообщений из истории");
+
+                    foreach (var line in history)
                     {
-                        var lines = File.ReadAllLines(historyFile);
-
-                        foreach (var line in lines)
+                        if (!string.IsNullOrWhiteSpace(line))
                         {
-                            if (!string.IsNullOrWhiteSpace(line) &&
-                                !line.Contains("=== Начало лога") &&
-                                !line.Contains("=== Сессия"))
-                            {
-                                AddChatMessageFromHistory(line);
-                            }
+                            Console.WriteLine($"Добавляю в чат: {line}");
+                            AddChatMessage(line);
                         }
                     }
                 }
@@ -1016,9 +1110,49 @@ namespace TOP_Messenger
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка загрузки истории сервера: {ex.Message}");
+                AddChatMessage($"Ошибка загрузки истории: {ex.Message}");
             }
         }
 
+
+        // Новый метод для дешифровки строки истории
+        private string DecryptMessageLine(string encryptedLine)
+        {
+            try
+            {
+                if (encryptedLine.Contains("] ["))
+                {
+                    int timestampEnd = encryptedLine.IndexOf("] ") + 2;
+                    int senderStart = encryptedLine.IndexOf("[", timestampEnd);
+                    int senderEnd = encryptedLine.IndexOf("]", senderStart) + 2;
+
+                    string timestampAndSender = encryptedLine.Substring(0, senderEnd);
+                    string encryptedMessage = encryptedLine.Substring(senderEnd).Trim();
+
+                    string decryptedMessage = Encryption.Decrypt(encryptedMessage);
+
+                    return $"{timestampAndSender}{decryptedMessage}";
+                }
+                else if (encryptedLine.Contains("] "))
+                {
+                    int timestampEnd = encryptedLine.IndexOf("] ") + 2;
+                    string timestamp = encryptedLine.Substring(0, timestampEnd);
+                    string encryptedMessage = encryptedLine.Substring(timestampEnd).Trim();
+
+                    string decryptedMessage = Encryption.Decrypt(encryptedMessage);
+
+                    return $"{timestamp}{decryptedMessage}";
+                }
+                else
+                {
+                    return encryptedLine;
+                }
+            }
+            catch (Exception)
+            {
+                return encryptedLine;
+            }
+        }
 
         private void LoadChatHistory()
         {

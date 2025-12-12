@@ -133,7 +133,7 @@ namespace TOP_Messenger
             }
         }
 
-        // Метод для сохранения сообщения в файл истории на сервере
+        // Метод для сохранения сообщения в файл истории на сервере (С ШИФРОВАНИЕМ)
         public void SaveMessageToServerLog(string message, string sender = null)
         {
             lock (_logFileLock)
@@ -148,13 +148,16 @@ namespace TOP_Messenger
                     string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
                     string messageToSave;
 
-                    if (string.IsNullOrEmpty(sender))
+                    if (string.IsNullOrEmpty(sender) || sender == "Система")
                     {
+                        // Системное сообщение НЕ шифруем
                         messageToSave = $"[{timestamp}] {message}";
                     }
                     else
                     {
-                        messageToSave = $"[{timestamp}] [{sender}] {message}";
+                        // Сообщение от пользователя - шифруем текст сообщения
+                        string encryptedMessage = EncryptMessageForStorage(message);
+                        messageToSave = $"[{timestamp}] [{sender}] {encryptedMessage}";
                     }
 
                     using (StreamWriter sw = File.AppendText(_messageLogFile))
@@ -166,6 +169,27 @@ namespace TOP_Messenger
                 {
                     LogMessage($"Ошибка сохранения сообщения в файл сервера: {ex.Message}");
                 }
+            }
+        }
+
+        // Шифрование сообщения для хранения в файле
+        private string EncryptMessageForStorage(string message)
+        {
+            // Шифруем только текст сообщения
+            return Encryption.Encrypt(message);
+        }
+
+        // Дешифрование сообщения при чтении из файла
+        private string DecryptMessageFromStorage(string encryptedMessage)
+        {
+            try
+            {
+                return Encryption.Decrypt(encryptedMessage);
+            }
+            catch (Exception)
+            {
+                // Если не удалось дешифровать, возвращаем оригинал
+                return encryptedMessage;
             }
         }
 
@@ -278,10 +302,10 @@ namespace TOP_Messenger
                 string connectMessage = $"{currentClientName} подключился к чату";
                 BroadcastColoredMessage(connectMessage, clientColor);
 
-                // Сохраняем в историю на сервере
+                // Сохраняем в историю на сервере (системное сообщение не шифруется)
                 SaveMessageToServerLog(connectMessage, "Система");
 
-                // Отправляем историю сообщений новому пользователю
+                // Отправляем историю сообщений новому пользователю (дешифрованную)
                 SendChatHistoryToClient(clientConn);
 
                 // Основной цикл обработки сообщений от клиента
@@ -298,16 +322,16 @@ namespace TOP_Messenger
 
                     if (!string.IsNullOrEmpty(message))
                     {
-                        // Сохраняем сообщение в истории на сервере
+                        // Сохраняем сообщение в истории на сервере (С ШИФРОВАНИЕМ)
                         SaveMessageToServerLog(message, currentClientName);
 
-                        // Отправляем сообщение всем остальным клиентам
+                        // Отправляем сообщение всем остальным клиентам (в открытом виде)
                         string coloredMessage = $"[{currentClientName}]: {message}";
                         BroadcastColoredMessage(coloredMessage, clientColor, clientConn);
                     }
                 }
 
-                // Сохраняем отключение в истории на сервере
+                // Сохраняем отключение в истории на сервере (системное сообщение)
                 SaveMessageToServerLog($"Пользователь {currentClientName} отключился", "Система");
             }
             catch (IOException)
@@ -399,7 +423,7 @@ namespace TOP_Messenger
             return darkBrightColors[colorIndex];
         }
 
-        // Отправка истории чата новому клиенту (с сервера)
+        // Отправка истории чата новому клиенту (с сервера) - ДЕШИФРУЕМ перед отправкой
         private void SendChatHistoryToClient(ClientConnection clientConn)
         {
             try
@@ -414,7 +438,12 @@ namespace TOP_Messenger
                         // Пропускаем системные сообщения о сессиях
                         if (!lines[i].Contains("=== Сессия") && !lines[i].Contains("=== Начало лога"))
                         {
-                            clientConn.Writer.WriteLine($"HISTORY:{lines[i]}");
+                            // Дешифруем сообщение перед отправкой (если оно зашифровано)
+                            string processedLine = ProcessHistoryLineForSending(lines[i]);
+                            if (!string.IsNullOrEmpty(processedLine))
+                            {
+                                clientConn.Writer.WriteLine($"HISTORY:{processedLine}");
+                            }
                         }
                     }
                     clientConn.Writer.Flush();
@@ -423,6 +452,135 @@ namespace TOP_Messenger
             catch (Exception ex)
             {
                 LogMessage($"Ошибка отправки истории: {ex.Message}");
+            }
+        }
+
+        // Обработка строки истории для отправки клиенту
+        private string ProcessHistoryLineForSending(string line)
+        {
+            // Формат строки: [timestamp] [sender] encrypted_message
+            // Или: [timestamp] message (для системных)
+
+            try
+            {
+                // Если это системное сообщение (без отправителя)
+                if (line.Contains("] ") && !line.Contains("] ["))
+                {
+                    int timestampEnd = line.IndexOf("] ") + 2;
+                    if (timestampEnd > 0 && timestampEnd < line.Length)
+                    {
+                        string timestamp = line.Substring(0, timestampEnd);
+                        string message = line.Substring(timestampEnd);
+
+                        // Системные сообщения не шифруются
+                        return $"{timestamp}{message}";
+                    }
+                }
+                // Если это сообщение от пользователя
+                else if (line.Contains("] ["))
+                {
+                    int timestampEnd = line.IndexOf("] ") + 2;
+                    int senderStart = line.IndexOf("[", timestampEnd);
+                    int senderEnd = line.IndexOf("]", senderStart);
+
+                    if (timestampEnd > 0 && senderStart > 0 && senderEnd > senderStart)
+                    {
+                        string timestamp = line.Substring(0, timestampEnd);
+                        string sender = line.Substring(senderStart + 1, senderEnd - senderStart - 1);
+                        string encryptedMessage = line.Substring(senderEnd + 1).Trim();
+
+                        // Дешифруем сообщение (если оно зашифровано)
+                        string decryptedMessage = DecryptMessageFromStorage(encryptedMessage);
+
+                        return $"{timestamp}[{sender}] {decryptedMessage}";
+                    }
+                }
+
+                return line; // В случае ошибки возвращаем оригинал
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"Ошибка обработки строки истории: {ex.Message}");
+                return line; // В случае ошибки возвращаем оригинал
+            }
+        }
+
+        // Метод для загрузки истории (используется в FormClient)
+        public List<string> LoadChatHistoryFromFile(int maxLines = 100)
+        {
+            List<string> history = new List<string>();
+
+            try
+            {
+                if (File.Exists(_messageLogFile))
+                {
+                    string[] lines = File.ReadAllLines(_messageLogFile);
+                    int startIndex = Math.Max(0, lines.Length - maxLines);
+
+                    for (int i = startIndex; i < lines.Length; i++)
+                    {
+                        if (!string.IsNullOrWhiteSpace(lines[i]) &&
+                            !lines[i].Contains("=== Начало лога") &&
+                            !lines[i].Contains("=== Сессия"))
+                        {
+                            // Обрабатываем строку для отображения (дешифруем)
+                            string processedLine = ProcessHistoryLineForDisplay(lines[i]);
+                            history.Add(processedLine);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"Ошибка загрузки истории: {ex.Message}");
+            }
+
+            return history;
+        }
+
+        // Обработка строки истории для отображения
+        private string ProcessHistoryLineForDisplay(string line)
+        {
+            try
+            {
+                // Если это системное сообщение (без отправителя)
+                if (line.Contains("] ") && !line.Contains("] ["))
+                {
+                    int timestampEnd = line.IndexOf("] ") + 2;
+                    if (timestampEnd > 0 && timestampEnd < line.Length)
+                    {
+                        string timestamp = line.Substring(1, timestampEnd - 3); // Без скобок
+                        string message = line.Substring(timestampEnd);
+
+                        return $"[{timestamp}] {message}";
+                    }
+                }
+                // Если это сообщение от пользователя
+                else if (line.Contains("] ["))
+                {
+                    int timestampEnd = line.IndexOf("] ") + 2;
+                    int senderStart = line.IndexOf("[", timestampEnd);
+                    int senderEnd = line.IndexOf("]", senderStart);
+
+                    if (timestampEnd > 0 && senderStart > 0 && senderEnd > senderStart)
+                    {
+                        string timestamp = line.Substring(1, timestampEnd - 3); // Без скобок
+                        string sender = line.Substring(senderStart + 1, senderEnd - senderStart - 1);
+                        string encryptedMessage = line.Substring(senderEnd + 1).Trim();
+
+                        // Дешифруем сообщение
+                        string decryptedMessage = DecryptMessageFromStorage(encryptedMessage);
+
+                        return $"[{timestamp}] [{sender}] {decryptedMessage}";
+                    }
+                }
+
+                return line;
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"Ошибка обработки строки для отображения: {ex.Message}");
+                return line;
             }
         }
 

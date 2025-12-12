@@ -59,7 +59,7 @@ namespace TOP_Messenger
         // Загрузка истории чата из файла
         public static List<string> LoadChatHistory(int maxLines = 50)
         {
-            return new List<string>();
+            return new List<string>(); // Больше не используется, так как загрузка через ChatServer
         }
 
         // Очистка истории чата (только для сервера)

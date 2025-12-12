@@ -54,16 +54,19 @@
             this.panelChats.SuspendLayout();
             this.panelHistoryFiles.SuspendLayout();
             this.SuspendLayout();
+            this.buttonFile.Click += new System.EventHandler(this.buttonFile_Click);
             // 
             // buttonPlayGame
             // 
             this.buttonPlayGame.Enabled = false;
+            this.buttonPlayGame.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonPlayGame.Location = new System.Drawing.Point(700, 6);
             this.buttonPlayGame.Name = "buttonPlayGame";
             this.buttonPlayGame.Size = new System.Drawing.Size(158, 41);
             this.buttonPlayGame.TabIndex = 0;
             this.buttonPlayGame.Text = "Играть";
             this.buttonPlayGame.UseVisualStyleBackColor = true;
+            this.buttonPlayGame.Click += new System.EventHandler(this.buttonPlayGame_Click);
             // 
             // panelUsers
             // 
@@ -86,7 +89,8 @@
             // 
             // btnSpecialGroups
             // 
-            this.btnSpecialGroups.Location = new System.Drawing.Point(0, 6);
+            this.btnSpecialGroups.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnSpecialGroups.Location = new System.Drawing.Point(0, 0);
             this.btnSpecialGroups.Name = "btnSpecialGroups";
             this.btnSpecialGroups.Size = new System.Drawing.Size(177, 32);
             this.btnSpecialGroups.TabIndex = 12;
@@ -96,9 +100,11 @@
             // btnUserAnanas
             // 
             this.btnUserAnanas.Enabled = false;
-            this.btnUserAnanas.Location = new System.Drawing.Point(1, 430);
+            this.btnUserAnanas.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnUserAnanas.ForeColor = System.Drawing.Color.Black;
+            this.btnUserAnanas.Location = new System.Drawing.Point(0, 430);
             this.btnUserAnanas.Name = "btnUserAnanas";
-            this.btnUserAnanas.Size = new System.Drawing.Size(177, 32);
+            this.btnUserAnanas.Size = new System.Drawing.Size(178, 32);
             this.btnUserAnanas.TabIndex = 10;
             this.btnUserAnanas.Text = "ananas";
             this.btnUserAnanas.UseVisualStyleBackColor = true;
@@ -106,9 +112,11 @@
             // btnUserVld
             // 
             this.btnUserVld.Enabled = false;
+            this.btnUserVld.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnUserVld.ForeColor = System.Drawing.Color.Black;
             this.btnUserVld.Location = new System.Drawing.Point(0, 392);
             this.btnUserVld.Name = "btnUserVld";
-            this.btnUserVld.Size = new System.Drawing.Size(177, 32);
+            this.btnUserVld.Size = new System.Drawing.Size(178, 32);
             this.btnUserVld.TabIndex = 9;
             this.btnUserVld.Text = "vld666";
             this.btnUserVld.UseVisualStyleBackColor = true;
@@ -116,6 +124,8 @@
             // buttonUserUSF
             // 
             this.buttonUserUSF.Enabled = false;
+            this.buttonUserUSF.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonUserUSF.ForeColor = System.Drawing.Color.Black;
             this.buttonUserUSF.Location = new System.Drawing.Point(1, 354);
             this.buttonUserUSF.Name = "buttonUserUSF";
             this.buttonUserUSF.Size = new System.Drawing.Size(177, 32);
@@ -126,6 +136,8 @@
             // btnUserSiles
             // 
             this.btnUserSiles.Enabled = false;
+            this.btnUserSiles.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnUserSiles.ForeColor = System.Drawing.Color.Black;
             this.btnUserSiles.Location = new System.Drawing.Point(1, 316);
             this.btnUserSiles.Name = "btnUserSiles";
             this.btnUserSiles.Size = new System.Drawing.Size(177, 32);
@@ -136,6 +148,8 @@
             // btnUserLushPush
             // 
             this.btnUserLushPush.Enabled = false;
+            this.btnUserLushPush.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnUserLushPush.ForeColor = System.Drawing.Color.Black;
             this.btnUserLushPush.Location = new System.Drawing.Point(1, 278);
             this.btnUserLushPush.Name = "btnUserLushPush";
             this.btnUserLushPush.Size = new System.Drawing.Size(177, 32);
@@ -146,6 +160,8 @@
             // btnUserTabeer
             // 
             this.btnUserTabeer.Enabled = false;
+            this.btnUserTabeer.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnUserTabeer.ForeColor = System.Drawing.Color.Black;
             this.btnUserTabeer.Location = new System.Drawing.Point(0, 240);
             this.btnUserTabeer.Name = "btnUserTabeer";
             this.btnUserTabeer.Size = new System.Drawing.Size(177, 32);
@@ -156,6 +172,8 @@
             // btnUserLady_Bug
             // 
             this.btnUserLady_Bug.Enabled = false;
+            this.btnUserLady_Bug.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnUserLady_Bug.ForeColor = System.Drawing.Color.Black;
             this.btnUserLady_Bug.Location = new System.Drawing.Point(0, 202);
             this.btnUserLady_Bug.Name = "btnUserLady_Bug";
             this.btnUserLady_Bug.Size = new System.Drawing.Size(177, 32);
@@ -166,6 +184,8 @@
             // btnUserCat_Noir
             // 
             this.btnUserCat_Noir.Enabled = false;
+            this.btnUserCat_Noir.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnUserCat_Noir.ForeColor = System.Drawing.Color.Black;
             this.btnUserCat_Noir.Location = new System.Drawing.Point(1, 164);
             this.btnUserCat_Noir.Name = "btnUserCat_Noir";
             this.btnUserCat_Noir.Size = new System.Drawing.Size(177, 32);
@@ -176,6 +196,8 @@
             // btnUserDenden
             // 
             this.btnUserDenden.Enabled = false;
+            this.btnUserDenden.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnUserDenden.ForeColor = System.Drawing.Color.Black;
             this.btnUserDenden.Location = new System.Drawing.Point(1, 126);
             this.btnUserDenden.Name = "btnUserDenden";
             this.btnUserDenden.Size = new System.Drawing.Size(177, 32);
@@ -186,6 +208,8 @@
             // btnUserPagan
             // 
             this.btnUserPagan.Enabled = false;
+            this.btnUserPagan.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnUserPagan.ForeColor = System.Drawing.Color.Black;
             this.btnUserPagan.Location = new System.Drawing.Point(0, 88);
             this.btnUserPagan.Name = "btnUserPagan";
             this.btnUserPagan.Size = new System.Drawing.Size(178, 32);
@@ -196,6 +220,8 @@
             // btnUserKrs
             // 
             this.btnUserKrs.Enabled = false;
+            this.btnUserKrs.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.btnUserKrs.ForeColor = System.Drawing.Color.Black;
             this.btnUserKrs.Location = new System.Drawing.Point(0, 50);
             this.btnUserKrs.Name = "btnUserKrs";
             this.btnUserKrs.Size = new System.Drawing.Size(177, 32);
@@ -216,9 +242,10 @@
             // 
             // buttonSend
             // 
-            this.buttonSend.Location = new System.Drawing.Point(420, 531);
+            this.buttonSend.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.buttonSend.Location = new System.Drawing.Point(417, 530);
             this.buttonSend.Name = "buttonSend";
-            this.buttonSend.Size = new System.Drawing.Size(75, 20);
+            this.buttonSend.Size = new System.Drawing.Size(78, 20);
             this.buttonSend.TabIndex = 3;
             this.buttonSend.Text = "Отправить";
             this.buttonSend.UseVisualStyleBackColor = true;
@@ -226,6 +253,7 @@
             // 
             // buttonFile
             // 
+            this.buttonFile.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.buttonFile.Location = new System.Drawing.Point(3, 531);
             this.buttonFile.Name = "buttonFile";
             this.buttonFile.Size = new System.Drawing.Size(71, 20);
@@ -243,27 +271,30 @@
             // 
             // listBoxChat
             // 
+            this.listBoxChat.Font = new System.Drawing.Font("Arial", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
             this.listBoxChat.FormattingEnabled = true;
-            this.listBoxChat.Location = new System.Drawing.Point(3, 3);
+            this.listBoxChat.ItemHeight = 17;
+            this.listBoxChat.Location = new System.Drawing.Point(-1, 0);
             this.listBoxChat.Name = "listBoxChat";
-            this.listBoxChat.Size = new System.Drawing.Size(492, 524);
+            this.listBoxChat.Size = new System.Drawing.Size(499, 497);
             this.listBoxChat.TabIndex = 0;
             // 
             // panelHistoryFiles
             // 
             this.panelHistoryFiles.Controls.Add(this.Files);
             this.panelHistoryFiles.Controls.Add(this.vScrollBar1);
-            this.panelHistoryFiles.Location = new System.Drawing.Point(700, 53);
+            this.panelHistoryFiles.Location = new System.Drawing.Point(700, 56);
             this.panelHistoryFiles.Name = "panelHistoryFiles";
-            this.panelHistoryFiles.Size = new System.Drawing.Size(158, 507);
+            this.panelHistoryFiles.Size = new System.Drawing.Size(158, 504);
             this.panelHistoryFiles.TabIndex = 3;
             // 
             // Files
             // 
             this.Files.AutoSize = true;
-            this.Files.Location = new System.Drawing.Point(57, 0);
+            this.Files.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.Files.Location = new System.Drawing.Point(54, 0);
             this.Files.Name = "Files";
-            this.Files.Size = new System.Drawing.Size(44, 13);
+            this.Files.Size = new System.Drawing.Size(50, 15);
             this.Files.TabIndex = 4;
             this.Files.Text = "Файлы";
             // 

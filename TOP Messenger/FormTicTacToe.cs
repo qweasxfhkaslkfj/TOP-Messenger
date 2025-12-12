@@ -54,7 +54,7 @@ namespace TOP_Messenger
             lblMe.Text = $"Ваш счет: {playerXScore}";
             lblHe.Text = $"Счет {Player2}: {playerOScore}";
         }
-        
+
         //Показывает кто ходит
         private void UpdateTurnDisplay()
         {
@@ -178,41 +178,47 @@ namespace TOP_Messenger
             btn1.BackColor = btn2.BackColor = btn3.BackColor = System.Drawing.Color.LightGreen;
         }
 
-        private void button9_Click_1(object sender, EventArgs e)
-        {
-            HandleButtonClick(button9);
-        }
-        private void button8_Click_1(object sender, EventArgs e)
-        {
-            HandleButtonClick(button8);
-        }
-        private void button7_Click_1(object sender, EventArgs e)
-        {
-            HandleButtonClick(button7);
-        }
-
-        private void button6_Click_1(object sender, EventArgs e)
+        private void button6_Click(object sender, EventArgs e)
         {
             HandleButtonClick(button6);
         }
-        private void button5_Click_1(object sender, EventArgs e)
+
+        private void button8_Click(object sender, EventArgs e)
         {
-            HandleButtonClick(button5);
+            HandleButtonClick(button8);
         }
-        private void button4_Click_1(object sender, EventArgs e)
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            HandleButtonClick(button9);
+        }
+
+        private void button4_Click(object sender, EventArgs e)
         {
             HandleButtonClick(button4);
         }
 
-        private void button3_Click_1(object sender, EventArgs e)
+        private void button5_Click(object sender, EventArgs e)
+        {
+            HandleButtonClick(button5);
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            HandleButtonClick(button7);
+        }
+
+        private void button3_Click(object sender, EventArgs e)
         {
             HandleButtonClick(button3);
         }
-        private void button2_Click_1(object sender, EventArgs e)
+
+        private void button2_Click(object sender, EventArgs e)
         {
             HandleButtonClick(button2);
         }
-        private void button1_Click_1(object sender, EventArgs e)
+
+        private void button1_Click(object sender, EventArgs e)
         {
             HandleButtonClick(button1);
         }

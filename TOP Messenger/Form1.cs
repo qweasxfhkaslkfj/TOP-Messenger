@@ -1158,14 +1158,6 @@ namespace TOP_Messenger
             }
         }
 
-<<<<<<< HEAD
-        private void buttonPlayGame_Click(object sender, EventArgs e)
-        {
-            FormGameSelection formGameSelection = new FormGameSelection();
-            formGameSelection.ShowDialog();
-            this.Hide();
-        }
-=======
         // Отправка всех выбранных файлов
         private async Task SendAllSelectedFiles()
         {
@@ -1265,6 +1257,5 @@ namespace TOP_Messenger
         private void btnUserUSF_Click(object sender, EventArgs e) { }
         private void btnUserVld_Click(object sender, EventArgs e) { }
         private void btnUserAnanas_Click(object sender, EventArgs e) { }
->>>>>>> 09f828f287be3b17c93e72b2f1545bf9352a3750
     }
 }

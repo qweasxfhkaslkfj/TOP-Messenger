@@ -98,11 +98,41 @@ namespace TOP_Messenger
                 IsValid = false
             };
         }
+
+        //Проверка Гостя
         public RegistrationResult CheckGuestLogin(string login)
         {
             ResetSession();
 
             if (string.IsNullOrWhiteSpace(login))
+            {
+                return new RegistrationResult
+                {
+                    IsValid = false
+                };
+            }
+
+
+            //Если логин гостя совпадает с логином Адимна
+            if (login == ServerAdminLogin)
+            {
+                return new RegistrationResult
+                {
+                    IsValid = false
+                };
+            }
+
+            //Если логин гостя совпадает с логином Клиента
+            if (usersLog.ContainsKey(login))
+            {
+                return new RegistrationResult
+                {
+                    IsValid = false
+                };
+            }
+
+            //Если количество символов больше 15 
+            if (login.Length >= 15)
             {
                 return new RegistrationResult
                 {

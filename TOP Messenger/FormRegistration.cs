@@ -39,7 +39,14 @@ namespace TOP_Messenger
                 }
                 else
                 {
-                    MessageBox.Show("Error!");
+                    if (textBoxLogin.Text.Length >= 15)
+                    {
+                        MessageBox.Show("Логин не может быть больше 15 символов!", "Ошибка");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Ошибка входа!");
+                    }
                 }
             }
             else
@@ -64,28 +71,34 @@ namespace TOP_Messenger
 
         private void textBoxLogin_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter && !e.Shift)
+            if (e.KeyCode == Keys.Enter)
             {
                 if (!textBoxPassword.Enabled)
                 {
                     Enter();
-                    e.SuppressKeyPress = true;
+                    buttonVhod.Focus();
                 }
                 else
                 {
                     textBoxPassword.Focus();
-                    e.SuppressKeyPress = true;
                 }
             }
         }
-
-        private void textBoxPassword_KeyDown(object sender, KeyEventArgs e)
+        private void textBoxPassword_KeyDown_1(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter && !e.Shift)
+            if (e.KeyCode == Keys.Enter)
             {
                 Enter();
-                e.SuppressKeyPress = true;
+                buttonVhod.Focus();
             }
+        }
+
+        private void btnLookPassword_Click(object sender, EventArgs e)
+        {
+            if (textBoxPassword.PasswordChar == '\0')
+                textBoxPassword.PasswordChar = '*';
+            else
+                textBoxPassword.PasswordChar = '\0';
         }
     }
 }

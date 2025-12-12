@@ -1257,5 +1257,16 @@ namespace TOP_Messenger
         private void btnUserUSF_Click(object sender, EventArgs e) { }
         private void btnUserVld_Click(object sender, EventArgs e) { }
         private void btnUserAnanas_Click(object sender, EventArgs e) { }
+
+        private void listBoxChat_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (listBoxChat.SelectedItems != null)
+            {
+                string selectedText = listBoxChat.SelectedItem.ToString();
+
+                Clipboard.SetText(selectedText);
+
+            }
+        }
     }
 }

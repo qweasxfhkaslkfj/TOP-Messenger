@@ -3,11 +3,23 @@
   "WorkspaceRootPath": "C:\\Users\\User\\Documents\\\u0423\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\TOP-Messenger\\TOP Messenger\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{7C9F4E97-F048-4841-934E-232BCA277C5A}|TOP Messenger.csproj|c:\\users\\user\\documents\\\u0443\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\top-messenger\\top messenger\\formtictactoe.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{7C9F4E97-F048-4841-934E-232BCA277C5A}|TOP Messenger.csproj|solutionrelative:formtictactoe.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+      "AbsoluteMoniker": "D:0:0:{7C9F4E97-F048-4841-934E-232BCA277C5A}|TOP Messenger.csproj|c:\\users\\user\\documents\\\u0443\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\top-messenger\\top messenger\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7C9F4E97-F048-4841-934E-232BCA277C5A}|TOP Messenger.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{7C9F4E97-F048-4841-934E-232BCA277C5A}|TOP Messenger.csproj|C:\\Users\\User\\Documents\\\u0423\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\TOP-Messenger\\TOP Messenger\\formregistration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{7C9F4E97-F048-4841-934E-232BCA277C5A}|TOP Messenger.csproj|c:\\users\\user\\documents\\\u0443\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\top-messenger\\top messenger\\formregistration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7C9F4E97-F048-4841-934E-232BCA277C5A}|TOP Messenger.csproj|solutionrelative:formregistration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7C9F4E97-F048-4841-934E-232BCA277C5A}|TOP Messenger.csproj|c:\\users\\user\\documents\\\u0443\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\top-messenger\\top messenger\\form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "RelativeMoniker": "D:0:0:{7C9F4E97-F048-4841-934E-232BCA277C5A}|TOP Messenger.csproj|solutionrelative:form1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7C9F4E97-F048-4841-934E-232BCA277C5A}|TOP Messenger.csproj|c:\\users\\user\\documents\\\u0443\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\top-messenger\\top messenger\\registration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{7C9F4E97-F048-4841-934E-232BCA277C5A}|TOP Messenger.csproj|solutionrelative:registration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7C9F4E97-F048-4841-934E-232BCA277C5A}|TOP Messenger.csproj|c:\\users\\user\\documents\\\u0443\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\top-messenger\\top messenger\\formregistration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{7C9F4E97-F048-4841-934E-232BCA277C5A}|TOP Messenger.csproj|solutionrelative:formregistration.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     }
   ],
@@ -18,20 +30,8 @@
       "DocumentGroups": [
         {
           "DockedHeight": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 2,
           "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "FormTicTacToe.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
-              "DocumentMoniker": "C:\\Users\\User\\Documents\\\u0423\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\TOP-Messenger\\TOP Messenger\\FormTicTacToe.cs",
-              "RelativeDocumentMoniker": "FormTicTacToe.cs",
-              "ToolTip": "C:\\Users\\User\\Documents\\\u0423\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\TOP-Messenger\\TOP Messenger\\FormTicTacToe.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
-              "RelativeToolTip": "FormTicTacToe.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-12T08:32:52.309Z",
-              "EditorCaption": " [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]"
-            },
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
@@ -42,15 +42,66 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Form1.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Documents\\\u0423\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\TOP-Messenger\\TOP Messenger\\Form1.cs",
+              "RelativeDocumentMoniker": "Form1.cs",
+              "ToolTip": "C:\\Users\\User\\Documents\\\u0423\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\TOP-Messenger\\TOP Messenger\\Form1.cs",
+              "RelativeToolTip": "Form1.cs",
+              "ViewState": "AgIAAIMBAAAAAAAAAAAAAPUEAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-12T09:56:17.327Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Form1.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
+              "DocumentMoniker": "C:\\Users\\User\\Documents\\\u0423\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\TOP-Messenger\\TOP Messenger\\Form1.cs",
+              "RelativeDocumentMoniker": "Form1.cs",
+              "ToolTip": "C:\\Users\\User\\Documents\\\u0423\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\TOP-Messenger\\TOP Messenger\\Form1.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
+              "RelativeToolTip": "Form1.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-12T09:55:07.488Z",
+              "EditorCaption": " [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 1,
+              "Title": "FormRegistration.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Documents\\\u0423\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\TOP-Messenger\\TOP Messenger\\FormRegistration.cs",
+              "RelativeDocumentMoniker": "FormRegistration.cs",
+              "ToolTip": "C:\\Users\\User\\Documents\\\u0423\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\TOP-Messenger\\TOP Messenger\\FormRegistration.cs",
+              "RelativeToolTip": "FormRegistration.cs",
+              "ViewState": "AgIAAEYAAAAAAAAAAAAAwFgAAAAZAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-12T09:19:31.68Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
               "Title": "FormRegistration.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
               "DocumentMoniker": "C:\\Users\\User\\Documents\\\u0423\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\TOP-Messenger\\TOP Messenger\\FormRegistration.cs",
               "RelativeDocumentMoniker": "FormRegistration.cs",
               "ToolTip": "C:\\Users\\User\\Documents\\\u0423\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\TOP-Messenger\\TOP Messenger\\FormRegistration.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
               "RelativeToolTip": "FormRegistration.cs [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-12T08:27:16.524Z",
+              "WhenOpened": "2025-12-12T08:37:40.811Z",
               "EditorCaption": " [\u041A\u043E\u043D\u0441\u0442\u0440\u0443\u043A\u0442\u043E\u0440]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Registration.cs",
+              "DocumentMoniker": "C:\\Users\\User\\Documents\\\u0423\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\TOP-Messenger\\TOP Messenger\\Registration.cs",
+              "RelativeDocumentMoniker": "Registration.cs",
+              "ToolTip": "C:\\Users\\User\\Documents\\\u0423\u0434\u0430\u043B\u0435\u043D\u043A\u0430\\TOP-Messenger\\TOP Messenger\\Registration.cs",
+              "RelativeToolTip": "Registration.cs",
+              "ViewState": "AgIAAF4AAAAAAAAAAADwv4QAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-12T08:37:47.857Z",
+              "EditorCaption": ""
             }
           ]
         },

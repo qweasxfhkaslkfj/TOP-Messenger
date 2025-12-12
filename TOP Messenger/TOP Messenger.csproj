@@ -49,6 +49,8 @@
     <Compile Include="ChatServer.cs" />
     <Compile Include="Decryption.cs" />
     <Compile Include="Encryption.cs" />
+    <Compile Include="FileDebug.cs" />
+    <Compile Include="FileTransfer.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

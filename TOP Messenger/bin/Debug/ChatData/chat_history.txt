@@ -1,7 +1,2 @@
-[2025-12-12 11:34] [Система] vhuyhu feuabunybhv a nqij
-[2025-12-12 11:34] [server] tzh
-[2025-12-12 11:34] [server] huzwj
-[2025-12-12 11:34] [server] Fgysvi
-[2025-12-12 11:35] [Система] Hvgsvg ehiqdesbvd
-[2025-12-12 12:01] [Система] vhuyhu feuabunybhv a nqij
-[2025-12-12 12:01] [Система] Hvgsvg ehiqdesbvd
+[2025-12-12 15:19] server подключился к чату
+[2025-12-12 15:19] Сервер остановлен

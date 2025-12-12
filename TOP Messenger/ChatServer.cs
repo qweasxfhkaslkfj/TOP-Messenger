@@ -23,15 +23,16 @@ namespace TOP_Messenger
         {
             Client = client;
             ClientName = tempId;
-            NetworkStream stream = client.GetStream();
-            Reader = new StreamReader(stream, Encoding.Unicode);
-            Writer = new StreamWriter(stream, Encoding.Unicode) { AutoFlush = true };
+            Stream = client.GetStream();
+            Reader = new StreamReader(Stream, Encoding.Unicode);
+            Writer = new StreamWriter(Stream, Encoding.Unicode) { AutoFlush = true };
         }
 
         public void Close()
         {
             try { Reader?.Close(); } catch { }
             try { Writer?.Close(); } catch { }
+            try { Stream?.Close(); } catch { }
             try { Client?.Close(); } catch { }
         }
     }
@@ -39,12 +40,14 @@ namespace TOP_Messenger
     public class ChatServer
     {
         private TcpListener _server;
+        private TcpListener _fileServer;
         private List<ClientConnection> _connectedClients = new List<ClientConnection>();
         private readonly object _clientsLock = new object();
         private readonly object _logFileLock = new object();
         private int _clientCounter = 0;
         private Thread _listenThread;
         private bool _isRunning = false;
+        private bool _isFileServerRunning = false;
         private string _messageLogFile;
 
         public event Action<string> MessageLogged;
@@ -93,20 +96,105 @@ namespace TOP_Messenger
                 _server.Start();
                 _isRunning = true;
 
+                // Запускаем сервер для файлов на отдельном порту (8889)
+                _fileServer = new TcpListener(ip, 8889);
+                _fileServer.Start();
+                _isFileServerRunning = true;
+
                 // Создаем файл лога только на сервере
                 InitializeLogFile();
 
                 LogMessage($"Сервер запущен на {ipAddress}:{port}");
+                LogMessage("Сервер файлов запущен на порту 8889");
                 LogMessage("Ожидание подключений...");
 
                 _listenThread = new Thread(new ThreadStart(ListenForClients));
                 _listenThread.IsBackground = true;
                 _listenThread.Start();
+
+                // Запускаем поток для приема файлов
+                Thread fileThread = new Thread(new ThreadStart(ListenForFiles));
+                fileThread.IsBackground = true;
+                fileThread.Start();
             }
             catch (Exception ex)
             {
                 LogMessage($"Ошибка запуска сервера: {ex.Message}");
                 _isRunning = false;
+            }
+        }
+
+        private void ListenForFiles()
+        {
+            try
+            {
+                while (_isFileServerRunning)
+                {
+                    TcpClient client = _fileServer.AcceptTcpClient();
+                    Thread clientThread = new Thread(() => HandleFileTransfer(client));
+                    clientThread.IsBackground = true;
+                    clientThread.Start();
+                }
+            }
+            catch (SocketException ex)
+            {
+                if (ex.SocketErrorCode == SocketError.Interrupted)
+                {
+                    LogMessage("Сервер файлов прекратил прослушивание.");
+                }
+                else if (_isFileServerRunning)
+                {
+                    LogMessage($"Ошибка прослушивания файловых подключений: {ex.Message}");
+                }
+            }
+            catch (Exception ex)
+            {
+                if (_isFileServerRunning)
+                {
+                    LogMessage($"Общая ошибка в ListenForFiles: {ex.Message}");
+                }
+            }
+        }
+
+        // Метод для обработки передачи файла
+        private void HandleFileTransfer(TcpClient client)
+        {
+            string senderLogin = "";
+
+            try
+            {
+                using (NetworkStream stream = client.GetStream())
+                using (BinaryReader reader = new BinaryReader(stream, Encoding.Unicode))
+                {
+                    // Читаем сигнал
+                    string signal = reader.ReadString();
+
+                    if (signal == "FILE_TRANSFER")
+                    {
+                        // Читаем логин отправителя
+                        senderLogin = reader.ReadString();
+
+                        // Сохраняем файл на сервере
+                        // Предполагается, что FileTransfer.SaveFileFromClient существует
+                        string serverFileName = FileTransfer.SaveFileFromClient(stream, senderLogin);
+
+                        // Отправляем клиенту имя сохраненного файла
+                        using (BinaryWriter writer = new BinaryWriter(stream, Encoding.Unicode))
+                        {
+                            writer.Write(serverFileName);
+                        }
+
+                        LogMessage($"Файл от {senderLogin} сохранен на сервере: {serverFileName}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"Ошибка обработки файла от {senderLogin}: {ex.Message}");
+            }
+            finally
+            {
+                try { client.Close(); } catch { }
             }
         }
 
@@ -134,7 +222,7 @@ namespace TOP_Messenger
         }
 
         // Метод для сохранения сообщения в файл истории на сервере (С ШИФРОВАНИЕМ)
-        public void SaveMessageToServerLog(string message, string sender = null)
+        public void SaveMessageToServerLog(string message, string sender = null, bool isFileMessage = false)
         {
             lock (_logFileLock)
             {
@@ -148,9 +236,9 @@ namespace TOP_Messenger
                     string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
                     string messageToSave;
 
-                    if (string.IsNullOrEmpty(sender) || sender == "Система")
+                    if (string.IsNullOrEmpty(sender) || sender == "Система" || isFileMessage)
                     {
-                        // Системное сообщение НЕ шифруем
+                        // Системные сообщения и сообщения о файлах НЕ шифруем
                         messageToSave = $"[{timestamp}] {message}";
                     }
                     else
@@ -175,7 +263,7 @@ namespace TOP_Messenger
         // Шифрование сообщения для хранения в файле
         private string EncryptMessageForStorage(string message)
         {
-            // Шифруем только текст сообщения
+            // Предполагается, что класс Encryption с методами Encrypt и Decrypt существует
             return Encryption.Encrypt(message);
         }
 
@@ -198,10 +286,12 @@ namespace TOP_Messenger
             if (!_isRunning) return;
 
             _isRunning = false;
+            _isFileServerRunning = false;
 
             try
             {
                 _server?.Stop();
+                _fileServer?.Stop();
                 SaveMessageToServerLog("Сервер остановлен", "Система");
                 LogMessage("Сервер остановлен.");
             }
@@ -295,7 +385,7 @@ namespace TOP_Messenger
                 }
 
                 // Отправляем цвет пользователю
-                clientConn.Writer.WriteLine($"YOUR_COLOR:{clientColor.ToArgb()}");
+                clientConn.Writer.WriteLine($"COLOR:{clientColor.ToArgb()}");
                 clientConn.Writer.Flush();
 
                 // Отправляем всем сообщение о подключении нового пользователя
@@ -308,7 +398,6 @@ namespace TOP_Messenger
                 // Отправляем историю сообщений новому пользователю (дешифрованную)
                 SendChatHistoryToClient(clientConn);
 
-                // Основной цикл обработки сообщений от клиента
                 string message;
                 while (_isRunning && (message = clientConn.Reader.ReadLine()) != null)
                 {
@@ -322,10 +411,27 @@ namespace TOP_Messenger
 
                     if (!string.IsNullOrEmpty(message))
                     {
-                        // Сохраняем сообщение в истории на сервере (С ШИФРОВАНИЕМ)
-                        SaveMessageToServerLog(message, currentClientName);
+                        // Проверяем, является ли сообщение о файле
+                        bool isFileMessage = message.Contains("[ФАЙЛ от") || message.Contains("[SERVER_FILE:");
 
-                        // Отправляем сообщение всем остальным клиентам (в открытом виде)
+                        if (isFileMessage)
+                        {
+                            // Обрабатываем файл на сервере (если содержит информацию о файле)
+                            if (message.Contains("[SERVER_FILE:"))
+                            {
+                                ProcessFileOnServer(message, currentClientName);
+                            }
+
+                            // Сохраняем сообщение о файле в истории НЕ шифрованным
+                            SaveMessageToServerLog(message, currentClientName, isFileMessage);
+                        }
+                        else
+                        {
+                            // Обычные сообщения сохраняем с шифрованием
+                            SaveMessageToServerLog(message, currentClientName, false);
+                        }
+
+                        // Отправляем сообщение всем остальным клиентам
                         string coloredMessage = $"[{currentClientName}]: {message}";
                         BroadcastColoredMessage(coloredMessage, clientColor, clientConn);
                     }
@@ -365,6 +471,81 @@ namespace TOP_Messenger
 
                 clientConn.Close();
                 LogMessage($"[{currentClientName}] отключен.");
+            }
+        }
+
+        // Метод для обработки файла на сервере
+        private void ProcessFileOnServer(string message, string sender)
+        {
+            try
+            {
+                if (message.Contains("[SERVER_FILE:"))
+                {
+                    int serverFileStart = message.IndexOf("[SERVER_FILE:") + 13;
+                    int serverFileEnd = message.IndexOf("]", serverFileStart);
+
+                    if (serverFileStart > 0 && serverFileEnd > serverFileStart)
+                    {
+                        string serverFileName = message.Substring(serverFileStart, serverFileEnd - serverFileStart);
+                        string originalFileName = "";
+                        long fileSize = 0;
+
+                        // Извлекаем оригинальное имя файла и размер
+                        if (message.Contains("]: "))
+                        {
+                            int nameStart = message.IndexOf("]: ") + 3;
+                            int nameEnd = message.IndexOf(" (");
+
+                            if (nameEnd > nameStart)
+                            {
+                                originalFileName = message.Substring(nameStart, nameEnd - nameStart).Trim();
+
+                                // Извлекаем размер файла
+                                int sizeStart = message.IndexOf(" (") + 2;
+                                int sizeEnd = message.IndexOf(")", sizeStart);
+
+                                if (sizeStart > 0 && sizeEnd > sizeStart)
+                                {
+                                    string sizeStr = message.Substring(sizeStart, sizeEnd - sizeStart);
+                                    // Убираем единицы измерения
+                                    sizeStr = sizeStr.Replace("Б", "").Replace("КБ", "").Replace("МБ", "").Replace("ГБ", "").Trim();
+                                    string[] sizeParts = sizeStr.Split(' ');
+
+                                    if (sizeParts.Length > 0 && double.TryParse(sizeParts[0], out double parsedSize))
+                                    {
+                                        // Конвертируем в байты
+                                        if (sizeStr.Contains("КБ") || sizeStr.Contains("кб"))
+                                            fileSize = (long)(parsedSize * 1024);
+                                        else if (sizeStr.Contains("МБ") || sizeStr.Contains("мб"))
+                                            fileSize = (long)(parsedSize * 1024 * 1024);
+                                        else if (sizeStr.Contains("ГБ") || sizeStr.Contains("гб"))
+                                            fileSize = (long)(parsedSize * 1024 * 1024 * 1024);
+                                        else
+                                            fileSize = (long)parsedSize;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (!string.IsNullOrEmpty(serverFileName) && !string.IsNullOrEmpty(originalFileName))
+                        {
+                            // Сохраняем информацию о файле
+                            string mappingFilePath = Path.Combine(FileTransfer.ServerFilesDirectory, "files_mapping.txt");
+                            string mappingLine = $"{DateTime.Now:yyyy-MM-dd HH:mm}|{sender}|{originalFileName}|{serverFileName}|{fileSize}";
+
+                            lock (_logFileLock)
+                            {
+                                File.AppendAllText(mappingFilePath, mappingLine + Environment.NewLine);
+                            }
+
+                            LogMessage($"Файл зарегистрирован: {originalFileName} → {serverFileName} ({fileSize} байт)");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogMessage($"Ошибка обработки файла на сервере: {ex.Message}");
             }
         }
 
@@ -431,7 +612,7 @@ namespace TOP_Messenger
                 if (File.Exists(_messageLogFile))
                 {
                     string[] lines = File.ReadAllLines(_messageLogFile);
-                    int startIndex = Math.Max(0, lines.Length - 50); // Последние 50 сообщений
+                    int startIndex = Math.Max(0, lines.Length - 50);
 
                     for (int i = startIndex; i < lines.Length; i++)
                     {
@@ -442,7 +623,7 @@ namespace TOP_Messenger
                             string processedLine = ProcessHistoryLineForSending(lines[i]);
                             if (!string.IsNullOrEmpty(processedLine))
                             {
-                                clientConn.Writer.WriteLine($"HISTORY:{processedLine}");
+                                clientConn.Writer.WriteLine(processedLine);
                             }
                         }
                     }

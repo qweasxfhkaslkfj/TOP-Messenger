@@ -256,21 +256,31 @@ namespace TOP_Messenger
         }
 
         // метод для добавления файла в историю
-        public void AddFileToHistory(string fileName, long fileSize = 0)
+        public void AddFileToHistory(string originalFileName, long fileSize = 0, string serverFileName = null)
         {
             try
             {
                 if (panelHistoryFiles.InvokeRequired)
                 {
-                    panelHistoryFiles.Invoke(new Action<string, long>(AddFileToHistory), fileName, fileSize);
+                    panelHistoryFiles.Invoke(new Action<string, long, string>(AddFileToHistory),
+                        originalFileName, fileSize, serverFileName);
                     return;
                 }
+
+                // Используем serverFileName если есть, иначе originalFileName
+                string displayName = !string.IsNullOrEmpty(serverFileName) ?
+                    Path.GetFileName(serverFileName) :
+                    Path.GetFileName(originalFileName);
+
+                string fileKey = !string.IsNullOrEmpty(serverFileName) ?
+                    serverFileName : originalFileName;
 
                 // Проверяем, не добавлен ли уже файл
                 bool alreadyAdded = false;
                 foreach (Control control in panelHistoryFiles.Controls)
                 {
-                    if (control is Panel panel && panel.Tag != null && panel.Tag.ToString() == fileName)
+                    if (control is Panel panel && panel.Tag != null &&
+                        panel.Tag.ToString() == fileKey)
                     {
                         alreadyAdded = true;
                         break;
@@ -279,15 +289,15 @@ namespace TOP_Messenger
 
                 if (alreadyAdded)
                 {
-                    Console.WriteLine($"Файл уже отображается: {fileName}");
+                    Console.WriteLine($"Файл уже отображается: {displayName}");
                     return;
                 }
 
                 // Добавляем файл в список
-                if (!chatFiles.Contains(fileName))
+                if (!chatFiles.Contains(fileKey))
                 {
-                    chatFiles.Add(fileName);
-                    Console.WriteLine($"Добавлен файл в список: {fileName}");
+                    chatFiles.Add(fileKey);
+                    Console.WriteLine($"Добавлен файл в список: {displayName} (ключ: {fileKey})");
                 }
 
                 // Ширина с учетом скроллбара
@@ -296,26 +306,23 @@ namespace TOP_Messenger
                 // Создаем простую панель для файла
                 Panel filePanel = new Panel
                 {
-                    Width = Math.Max(panelWidth, 100), // Минимальная ширина
-                    Height = 45,
+                    Width = Math.Max(panelWidth, 100),
+                    Height = 55,
                     Margin = new Padding(5, 5, 5, 5),
                     BackColor = Color.White,
                     BorderStyle = BorderStyle.FixedSingle,
                     Cursor = Cursors.Hand,
-                    Tag = fileName // Сохраняем имя файла в Tag
+                    Tag = fileKey // Сохраняем ключ файла в Tag
                 };
 
                 // Укорачиваем имя файла для отображения
-                string displayName = Path.GetFileName(fileName);
-                if (displayName.Length > 25)
-                {
-                    displayName = displayName.Substring(0, 22) + "...";
-                }
+                string shortDisplayName = displayName.Length > 25 ?
+                    displayName.Substring(0, 22) + "..." : displayName;
 
-                // Название файла
+                // Оригинальное имя файла
                 Label fileNameLabel = new Label
                 {
-                    Text = displayName,
+                    Text = $"📎 {Path.GetFileName(originalFileName)}",
                     AutoSize = false,
                     Width = filePanel.Width - 90,
                     Height = 20,
@@ -324,19 +331,21 @@ namespace TOP_Messenger
                     Font = new Font("Arial", 9, FontStyle.Bold),
                     ForeColor = Color.Black,
                     TextAlign = ContentAlignment.MiddleLeft,
-                    Tag = fileName,
+                    Tag = fileKey,
                     Cursor = Cursors.Hand
                 };
 
                 // Информация о файле
-                string fileInfo = "";
+                string fileInfo = $"Отправитель: {Registration.GetCurrentLogin()}";
                 if (fileSize > 0)
                 {
-                    fileInfo = FormatFileSize(fileSize);
+                    fileInfo += $" | Размер: {FormatFileSize(fileSize)}";
                 }
-                else
+
+                // Добавляем информацию о серверном файле
+                if (!string.IsNullOrEmpty(serverFileName))
                 {
-                    fileInfo = "Размер неизвестен";
+                    fileInfo += " | 📍 На сервере";
                 }
 
                 Label fileInfoLabel = new Label
@@ -344,60 +353,60 @@ namespace TOP_Messenger
                     Text = fileInfo,
                     AutoSize = false,
                     Width = filePanel.Width - 90,
-                    Height = 15,
+                    Height = 30,
                     Left = 10,
                     Top = 25,
                     Font = new Font("Arial", 8),
                     ForeColor = Color.DarkGray,
                     TextAlign = ContentAlignment.MiddleLeft,
-                    Tag = fileName,
+                    Tag = fileKey,
                     Cursor = Cursors.Hand
                 };
 
-                // Кнопка "Сохранить"
-                Button saveBtn = new Button
+                // Кнопка "Скачать"
+                Button downloadBtn = new Button
                 {
-                    Text = "Сохранить",
+                    Text = "Скачать",
                     Width = 70,
-                    Height = 30,
+                    Height = 40,
                     Left = filePanel.Width - 75,
                     Top = 7,
-                    Tag = fileName,
+                    Tag = fileKey,
                     FlatStyle = FlatStyle.Flat,
-                    BackColor = Color.LightBlue,
+                    BackColor = Color.LightGreen,
                     Font = new Font("Arial", 8),
                     Cursor = Cursors.Hand
                 };
 
                 // Обработчики событий
-                saveBtn.Click += (sender, e) =>
+                downloadBtn.Click += (sender, e) =>
                 {
-                    string fileToSave = (string)((Button)sender).Tag;
-                    SaveFile(fileToSave);
+                    string fileToDownload = (string)((Button)sender).Tag;
+                    DownloadFile(fileToDownload, originalFileName);
                 };
 
                 fileNameLabel.Click += (sender, e) =>
                 {
-                    string fileToSave = (string)((Label)sender).Tag;
-                    SaveFile(fileToSave);
+                    string fileToDownload = (string)((Label)sender).Tag;
+                    DownloadFile(fileToDownload, originalFileName);
                 };
 
                 fileInfoLabel.Click += (sender, e) =>
                 {
-                    string fileToSave = (string)((Label)sender).Tag;
-                    SaveFile(fileToSave);
+                    string fileToDownload = (string)((Label)sender).Tag;
+                    DownloadFile(fileToDownload, originalFileName);
                 };
 
                 filePanel.Click += (sender, e) =>
                 {
-                    string fileToSave = (string)((Panel)sender).Tag;
-                    SaveFile(fileToSave);
+                    string fileToDownload = (string)((Panel)sender).Tag;
+                    DownloadFile(fileToDownload, originalFileName);
                 };
 
                 // Добавляем элементы на панель
                 filePanel.Controls.Add(fileNameLabel);
                 filePanel.Controls.Add(fileInfoLabel);
-                filePanel.Controls.Add(saveBtn);
+                filePanel.Controls.Add(downloadBtn);
 
                 // Добавляем панель в панель истории файлов
                 panelHistoryFiles.Controls.Add(filePanel);
@@ -409,12 +418,115 @@ namespace TOP_Messenger
                 panelHistoryFiles.PerformLayout();
                 panelHistoryFiles.Refresh();
 
-                Console.WriteLine($"Файловая панель добавлена: {fileName}. Всего панелей: {panelHistoryFiles.Controls.Count}. Ширина панели: {filePanel.Width}");
+                Console.WriteLine($"Файловая панель добавлена: {originalFileName}. Ключ: {fileKey}");
 
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка в AddFileToHistory: {ex.Message}");
+            }
+        }
+        private void DownloadFile(string fileKey, string originalFileName)
+        {
+            try
+            {
+                Console.WriteLine($"Попытка скачать файл. Ключ: {fileKey}, Оригинал: {originalFileName}");
+
+                // Извлекаем serverFileName из fileKey
+                string serverFileName = null;
+
+                if (fileKey.Contains("[SERVER_FILE:"))
+                {
+                    int start = fileKey.IndexOf("[SERVER_FILE:") + 13;
+                    int end = fileKey.IndexOf("]", start);
+                    if (start > 0 && end > start)
+                    {
+                        serverFileName = fileKey.Substring(start, end - start).Trim();
+                    }
+                }
+
+                // Если не нашли в fileKey, ищем оригинальное имя
+                if (string.IsNullOrEmpty(serverFileName))
+                {
+                    serverFileName = originalFileName;
+                }
+
+                Console.WriteLine($"Ищем файл на сервере: {serverFileName}");
+
+                // Показываем диалог сохранения
+                using (SaveFileDialog saveDialog = new SaveFileDialog())
+                {
+                    saveDialog.FileName = Path.GetFileName(originalFileName);
+                    saveDialog.Filter = "Все файлы (*.*)|*.*";
+                    saveDialog.Title = "Скачать файл с сервера";
+
+                    if (saveDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        // Проверяем, существует ли файл на сервере
+                        bool fileExists = FileTransfer.FileExistsOnServer(serverFileName);
+                        Console.WriteLine($"Файл существует на сервере: {fileExists}");
+
+                        if (!fileExists)
+                        {
+                            // Пытаемся найти файл по другому имени
+                            Console.WriteLine("Пытаюсь найти файл другим способом...");
+
+                            // Получаем все файлы на сервере
+                            var allFiles = FileTransfer.GetAllServerFiles();
+                            Console.WriteLine($"Всего файлов на сервере: {allFiles.Count}");
+
+                            foreach (var file in allFiles)
+                            {
+                                Console.WriteLine($"  - {file}");
+
+                                // Ищем файл, который содержит оригинальное имя
+                                string fileWithoutExt = Path.GetFileNameWithoutExtension(file);
+                                string origWithoutExt = Path.GetFileNameWithoutExtension(originalFileName);
+
+                                if (file.Contains(origWithoutExt) ||
+                                    fileWithoutExt.Contains(origWithoutExt) ||
+                                    origWithoutExt.Contains(fileWithoutExt))
+                                {
+                                    Console.WriteLine($"Нашел возможный файл: {file}");
+                                    serverFileName = file;
+                                    fileExists = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (fileExists)
+                        {
+                            try
+                            {
+                                // Скачиваем файл
+                                string downloadedPath = FileTransfer.DownloadFileFromServer(serverFileName, saveDialog.FileName);
+
+                                MessageBox.Show($"Файл успешно скачан!\n{Path.GetFileName(downloadedPath)}",
+                                    "Успешно", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                                AddChatMessage($"Файл '{Path.GetFileName(originalFileName)}' скачан");
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"Ошибка при скачивании: {ex.Message}",
+                                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show($"Файл не найден на сервере.\n\n" +
+                                          $"Искали файл: {serverFileName}\n" +
+                                          $"Оригинальное имя: {originalFileName}",
+                                "Файл не найден", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}",
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         private void SaveFile(string fileName)
@@ -578,57 +690,118 @@ namespace TOP_Messenger
                         SaveUserColorFromMessage(textPart, messageColor);
 
                         // Проверяем, является ли сообщение о файле
-                        if (textPart.Contains("[ФАЙЛ от"))
+                        if (textPart.Contains("[ФАЙЛ от") || textPart.Contains("[SERVER_FILE:"))
                         {
-                            ExtractFileNameFromMessage(textPart);
+                            // Извлекаем информацию о серверном файле
+                            ExtractFileInfoFromMessage(textPart);
                         }
 
                         AddChatMessage(textPart);
                     }
                 }
             }
-            else if (message.StartsWith("YOUR_COLOR:"))
+            else if (message.Contains("[SERVER_FILE:") || message.Contains("[ФАЙЛ от"))
             {
-                // Сообщение с цветом текущего пользователя
-                string colorPart = message.Substring(11);
-                if (int.TryParse(colorPart, out int argb))
-                {
-                    currentUserColor = Color.FromArgb(argb);
-                    string login = Registration.GetCurrentLogin();
-                    SaveUserColor(login, currentUserColor);
-                }
-            }
-            else if (message.StartsWith("HISTORY:"))
-            {
-                // Получаем историю с сервера (уже дешифрованную)
-                string historyMessage = message.Substring(8);
-
-                // Пробуем дешифровать на случай, если сервер не дешифровал
-                try
-                {
-                    // Проверяем, зашифровано ли сообщение
-                    if (IsEncryptedMessage(historyMessage))
-                    {
-                        historyMessage = DecryptMessageFromHistory(historyMessage);
-                    }
-                }
-                catch { }
-
-                AddChatMessageFromHistory(historyMessage);
-            }
-            else if (message.Contains("[ФАЙЛ от"))
-            {
-                // Сообщение о файле без цвета
-                ExtractFileNameFromMessage(message);
+                // Сообщение с информацией о серверном файле
+                ExtractFileInfoFromMessage(message);
                 AddChatMessage(message);
             }
             else
             {
-                // Обычное сообщение без цвета
+                // Обычное сообщение
                 AddChatMessage(message);
             }
         }
+        private void ExtractFileInfoFromMessage(string message)
+        {
+            try
+            {
+                Console.WriteLine($"Извлекаю информацию о файле из сообщения: {message}");
 
+                // Упрощаем логику: просто ищем [SERVER_FILE:...]
+                if (message.Contains("[SERVER_FILE:") && message.Contains("]"))
+                {
+                    int serverFileStart = message.IndexOf("[SERVER_FILE:") + 13;
+                    int serverFileEnd = message.IndexOf("]", serverFileStart);
+
+                    if (serverFileStart > 0 && serverFileEnd > serverFileStart)
+                    {
+                        string serverFileName = message.Substring(serverFileStart, serverFileEnd - serverFileStart).Trim();
+                        string originalFileName = "";
+                        long fileSize = 0;
+
+                        // Пытаемся найти оригинальное имя файла
+                        // Формат: [ФАЙЛ от user]: filename (size) [SERVER_FILE:...]
+                        if (message.Contains("]: "))
+                        {
+                            int nameStart = message.IndexOf("]: ") + 3;
+                            int nameEnd = message.IndexOf(" (");
+
+                            if (nameEnd > nameStart)
+                            {
+                                originalFileName = message.Substring(nameStart, nameEnd - nameStart).Trim();
+                            }
+                            else
+                            {
+                                // Если нет скобок с размером, берем все до [SERVER_FILE:
+                                int serverTagPos = message.IndexOf("[SERVER_FILE:");
+                                if (serverTagPos > nameStart)
+                                {
+                                    originalFileName = message.Substring(nameStart, serverTagPos - nameStart).Trim();
+                                }
+                                else
+                                {
+                                    // Последний вариант: берем все после "]: "
+                                    originalFileName = message.Substring(nameStart).Trim();
+                                }
+                            }
+                        }
+
+                        // Пытаемся извлечь размер
+                        if (message.Contains("(") && message.Contains(")"))
+                        {
+                            int sizeStart = message.IndexOf("(") + 1;
+                            int sizeEnd = message.IndexOf(")", sizeStart);
+
+                            if (sizeStart > 0 && sizeEnd > sizeStart)
+                            {
+                                string sizeStr = message.Substring(sizeStart, sizeEnd - sizeStart);
+
+                                // Убираем "Б", "КБ" и т.д.
+                                string[] parts = sizeStr.Split(new[] { ' ', 'Б', 'К', 'М', 'Г' }, StringSplitOptions.RemoveEmptyEntries);
+                                if (parts.Length > 0 && double.TryParse(parts[0], out double parsedSize))
+                                {
+                                    if (sizeStr.Contains("КБ") || sizeStr.Contains("кб"))
+                                        fileSize = (long)(parsedSize * 1024);
+                                    else if (sizeStr.Contains("МБ") || sizeStr.Contains("мб"))
+                                        fileSize = (long)(parsedSize * 1024 * 1024);
+                                    else
+                                        fileSize = (long)parsedSize;
+                                }
+                            }
+                        }
+
+                        // Если не удалось извлечь оригинальное имя, используем серверное
+                        if (string.IsNullOrEmpty(originalFileName))
+                        {
+                            originalFileName = serverFileName;
+                        }
+
+                        Console.WriteLine($"Файл найден: оригинал='{originalFileName}', сервер='{serverFileName}', размер={fileSize}");
+
+                        // Создаем ключ для файла
+                        string fileKey = $"{originalFileName} [SERVER_FILE:{serverFileName}]";
+
+                        // Добавляем в историю
+                        AddFileToHistory(originalFileName, fileSize, fileKey);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка извлечения информации о файле: {ex.Message}");
+            }
+        }
         // Проверяет, зашифровано ли сообщение (по наличию зашифрованных символов)
         private bool IsEncryptedMessage(string message)
         {
@@ -1075,6 +1248,18 @@ namespace TOP_Messenger
 
         private void FormClient_Load(object sender, EventArgs e)
         {
+            // Отладочная информация
+            Console.WriteLine($"Текущий пользователь: {Registration.GetCurrentLogin()}");
+            Console.WriteLine($"Путь ServerFiles: {FileTransfer.ServerFilesDirectory}");
+
+            // Проверить существование директории
+            if (!Directory.Exists(FileTransfer.ServerFilesDirectory))
+            {
+                Console.WriteLine($"ВНИМАНИЕ: Директория ServerFiles не существует!");
+                Console.WriteLine($"Создаю директорию...");
+                Directory.CreateDirectory(FileTransfer.ServerFilesDirectory);
+            }
+
             if (Registration.IsCurrentUserServer())
             {
                 LoadServerChatHistory();
@@ -1332,11 +1517,92 @@ namespace TOP_Messenger
 
                 Console.WriteLine($"Отправка файла: {fileName}, размер: {fileSize} байт");
 
-                // Сохраняем информацию о файле в истории
-                SavingMessage.SaveFileMessage(Registration.GetCurrentLogin(), fileName, fileSize);
-
                 // Показываем сообщение о начале отправки
                 AddChatMessage($"Отправляю файл: {fileName} ({FormatFileSize(fileSize)})...");
+
+                // Отправляем файл на сервер
+                bool fileSent = false;
+                string serverFileName = "";
+
+                if (isConnected && tcpClient != null && tcpClient.Connected)
+                {
+                    // Создаем отдельное соединение для передачи файла
+                    using (TcpClient fileClient = new TcpClient())
+                    {
+                        try
+                        {
+                            // Подключаемся к специальному порту для файлов (например, 8889)
+                            fileClient.Connect(serverIP, 8889);
+
+                            using (NetworkStream stream = fileClient.GetStream())
+                            using (BinaryWriter writer = new BinaryWriter(stream, Encoding.Unicode))
+                            {
+                                // Отправляем сигнал, что это файл
+                                writer.Write("FILE_TRANSFER");
+
+                                // Отправляем логин отправителя
+                                writer.Write(Registration.GetCurrentLogin());
+
+                                // Отправляем имя файла
+                                writer.Write(fileName);
+
+                                // Отправляем размер файла
+                                writer.Write(fileSize);
+
+                                // Отправляем содержимое файла
+                                using (FileStream fileStream = File.OpenRead(filePath))
+                                {
+                                    byte[] buffer = new byte[8192];
+                                    int bytesRead;
+                                    long totalBytesSent = 0;
+
+                                    while ((bytesRead = fileStream.Read(buffer, 0, buffer.Length)) > 0)
+                                    {
+                                        stream.Write(buffer, 0, bytesRead);
+                                        totalBytesSent += bytesRead;
+
+                                        // Обновляем прогресс (опционально)
+                                        int progress = (int)((totalBytesSent * 100) / fileSize);
+                                        // Можно обновлять UI с прогрессом
+                                    }
+                                }
+
+                                // Читаем ответ от сервера с именем сохраненного файла
+                                using (BinaryReader reader = new BinaryReader(stream, Encoding.Unicode))
+                                {
+                                    serverFileName = reader.ReadString();
+                                }
+
+                                fileSent = true;
+                                Console.WriteLine($"Файл успешно отправлен на сервер: {serverFileName}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Ошибка передачи файла на сервер: {ex.Message}");
+                            // Пробуем локальное сохранение
+                        }
+                    }
+                }
+
+                // Если не удалось отправить через сеть, сохраняем локально
+                if (!fileSent)
+                {
+                    try
+                    {
+                        string serverFilePath = FileTransfer.SaveFileOnServer(
+                            filePath,
+                            Registration.GetCurrentLogin()
+                        );
+                        serverFileName = Path.GetFileName(serverFilePath);
+                        Console.WriteLine($"Файл сохранен локально: {serverFilePath}");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Ошибка локального сохранения файла: {ex.Message}");
+                        serverFileName = fileName;
+                    }
+                }
 
                 // Имитация отправки
                 await Task.Delay(300);
@@ -1344,8 +1610,8 @@ namespace TOP_Messenger
                 // Уведомляем в чате об успешной отправке
                 AddChatMessage($"Файл {fileName} отправлен!");
 
-                // Отправляем сообщение в чат о файле
-                string fileMessage = $"[ФАЙЛ от {Registration.GetCurrentLogin()}]: {fileName} ({FormatFileSize(fileSize)})";
+                // Отправляем сообщение в чат о файле (НЕ шифруется)
+                string fileMessage = $"[ФАЙЛ от {Registration.GetCurrentLogin()}]: {fileName} ({FormatFileSize(fileSize)}) [SERVER_FILE:{serverFileName}]";
 
                 // Если подключены к серверу, отправляем сообщение о файле
                 if (isConnected && writer != null)
@@ -1359,24 +1625,35 @@ namespace TOP_Messenger
                     AddOwnMessage($"Файл: {fileName} ({FormatFileSize(fileSize)})");
                 }
 
-                // Добавляем файл в историю
-                Console.WriteLine($"Добавляю файл в историю: {fileName}");
-                AddFileToHistory(fileName, fileSize);
+                // Добавляем файл в историю с указанием имени файла на сервере
+                Console.WriteLine($"Добавляю файл в историю: {fileName} (серверное имя: {serverFileName})");
+                AddFileToHistory(fileName, fileSize, serverFileName);
 
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка отправки файла {filePath}: {ex.Message}");
                 AddChatMessage($"Ошибка отправки файла: {ex.Message}");
+
+                // Показываем пользователю сообщение об ошибке
+                MessageBox.Show($"Ошибка отправки файла: {ex.Message}",
+                    "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-        // Кнопка "Играть"
         private void buttonPlayGame_Click(object sender, EventArgs e)
         {
             // Реализация игры
             MessageBox.Show("Функция игры в разработке", "Игра",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        
+        private void listBoxChat_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (listBoxChat.SelectedItems != null)
+            {
+                string selectetText = listBoxChat.SelectedItem.ToString();
+                Clipboard.SetText(selectetText);
+            }
         }
 
         // Обработчики кнопок пользователей
@@ -1391,5 +1668,6 @@ namespace TOP_Messenger
         private void btnUserUSF_Click(object sender, EventArgs e) { }
         private void btnUserVld_Click(object sender, EventArgs e) { }
         private void btnUserAnanas_Click(object sender, EventArgs e) { }
+
     }
 }

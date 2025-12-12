@@ -35,6 +35,7 @@
             this.buttonVhod = new System.Windows.Forms.Button();
             this.buttonZahodGosta = new System.Windows.Forms.Button();
             this.textBoxPassword = new System.Windows.Forms.TextBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // labelProsba
@@ -104,12 +105,25 @@
             this.textBoxPassword.PasswordChar = '*';
             this.textBoxPassword.Size = new System.Drawing.Size(214, 20);
             this.textBoxPassword.TabIndex = 7;
+            this.textBoxPassword.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBoxPassword_KeyDown_1);
+            // 
+            // button1
+            // 
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button1.Location = new System.Drawing.Point(365, 135);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(27, 20);
+            this.button1.TabIndex = 8;
+            this.button1.Text = "👁";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // FormRegistration
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(584, 261);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.textBoxPassword);
             this.Controls.Add(this.buttonZahodGosta);
             this.Controls.Add(this.buttonVhod);
@@ -135,5 +149,6 @@
         private System.Windows.Forms.Button buttonVhod;
         private System.Windows.Forms.Button buttonZahodGosta;
         private System.Windows.Forms.TextBox textBoxPassword;
+        private System.Windows.Forms.Button button1;
     }
 }

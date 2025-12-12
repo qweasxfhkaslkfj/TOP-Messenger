@@ -54,7 +54,6 @@
             this.panelChats.SuspendLayout();
             this.panelHistoryFiles.SuspendLayout();
             this.SuspendLayout();
-            this.buttonFile.Click += new System.EventHandler(this.buttonFile_Click);
             // 
             // buttonPlayGame
             // 
@@ -260,6 +259,7 @@
             this.buttonFile.TabIndex = 2;
             this.buttonFile.Text = "Файл";
             this.buttonFile.UseVisualStyleBackColor = true;
+            this.buttonFile.Click += new System.EventHandler(this.buttonFile_Click);
             // 
             // textBoxMessage
             // 
@@ -278,6 +278,7 @@
             this.listBoxChat.Name = "listBoxChat";
             this.listBoxChat.Size = new System.Drawing.Size(499, 497);
             this.listBoxChat.TabIndex = 0;
+            this.listBoxChat.SelectedIndexChanged += new System.EventHandler(this.listBoxChat_SelectedIndexChanged);
             // 
             // panelHistoryFiles
             // 

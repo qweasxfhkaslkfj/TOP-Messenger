@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +20,17 @@ namespace TOP_Messenger
         {
             if (string.IsNullOrEmpty(message))
                 return message;
+
+            // Если сообщение содержит информацию о файле или серверном файле - НЕ шифруем
+            if (message.Contains("[ФАЙЛ от") || message.Contains("[SERVER_FILE:") ||
+                message.Contains("подключился к чату") || message.Contains("покинул чат") ||
+                message.Contains("Отправил файл:") || message.Contains("Выбрано ") ||
+                message.Contains(" файлов") || message.Contains("Отправляю файл:") ||
+                message.Contains("Файл отправлен") || message.Contains("Скачать файл") ||
+                message.Contains("Файл скачан") || message.Contains("[ФАЙЛЫ]:"))
+            {
+                return message;
+            }
 
             StringBuilder encrypted = new StringBuilder();
 

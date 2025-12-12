@@ -8,8 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-
-
 namespace TOP_Messenger
 {
     public partial class FormClient : Form
@@ -91,25 +89,27 @@ namespace TOP_Messenger
         {
             userColors.Clear();
 
-            // Устанавливаем цвета для всех пользователей
-            userColors.Add("krs333", Color.DarkOrange);
-            userColors.Add("Pagan821", Color.Pink);
-            userColors.Add("denden", Color.DarkGreen);
-            userColors.Add("cat_noir", Color.Black);
-            userColors.Add("lady_bug", Color.DarkRed);
-            userColors.Add("tabeer", Color.Brown);
-            userColors.Add("lushPush", Color.DarkViolet);
-            userColors.Add("Siles", Color.DarkSlateBlue);
-            userColors.Add("USF055", Color.MidnightBlue);
-            userColors.Add("vld666", Color.Maroon);
-            userColors.Add("ananas", Color.Purple);
-            userColors.Add("server", Color.Black);
+            // Явно задаем цвета для всех известных пользователей
+            userColors["krs333"] = Color.DarkOrange;
+            userColors["Pagan821"] = Color.Pink; // Розовый цвет для Pagan821
+            userColors["denden"] = Color.DarkGreen;
+            userColors["cat_noir"] = Color.Black;
+            userColors["lady_bug"] = Color.DarkRed;
+            userColors["tabeer"] = Color.Brown;
+            userColors["lushPush"] = Color.DarkViolet;
+            userColors["Siles"] = Color.DarkSlateBlue;
+            userColors["USF055"] = Color.MidnightBlue;
+            userColors["vld666"] = Color.Maroon;
+            userColors["ananas"] = Color.Purple;
+            userColors["server"] = Color.Black; // Черный для сервера
 
-            // Добавляем цвета для гостей
-            for (int i = 1; i <= 10; i++)
+            // Добавляем цвета для возможных гостей
+            for (int i = 1; i <= 20; i++)
             {
-                userColors.Add($"Guest#{i}", GetGuestColor(i));
+                userColors[$"Guest#{i}"] = GetGuestColor(i);
             }
+
+            Console.WriteLine("Инициализированы цвета пользователей по умолчанию");
         }
 
         // Получение цвета для гостя
@@ -154,7 +154,6 @@ namespace TOP_Messenger
             // Очищаем панель при инициализации
             panelHistoryFiles.Controls.Clear();
         }
-
 
         // Метод для упорядочивания панелей файлов
         private void ArrangeFilePanels()
@@ -203,7 +202,8 @@ namespace TOP_Messenger
                 Console.WriteLine($"Ошибка в ArrangeFilePanels: {ex.Message}");
             }
         }
-        //  обработчик для изменения размера формы
+
+        // обработчик для изменения размера формы
         private void FormClient_Resize(object sender, EventArgs e)
         {
             listBoxChat.BeginUpdate();
@@ -410,6 +410,7 @@ namespace TOP_Messenger
                 Console.WriteLine($"Ошибка в AddFileToHistory: {ex.Message}");
             }
         }
+
         private void SaveFile(string fileName)
         {
             using (SaveFileDialog saveDialog = new SaveFileDialog())
@@ -555,6 +556,8 @@ namespace TOP_Messenger
 
         private void ProcessMessage(string message)
         {
+            Console.WriteLine($"Получено сообщение: {message}");
+
             // Обработка сообщений от сервера
             if (message.StartsWith("COLOR:"))
             {
@@ -577,6 +580,7 @@ namespace TOP_Messenger
                         }
 
                         AddChatMessage(textPart);
+                        return;
                     }
                 }
             }
@@ -590,19 +594,84 @@ namespace TOP_Messenger
                     string login = Registration.GetCurrentLogin();
                     SaveUserColor(login, currentUserColor);
                     AddChatMessage($"Ваш цвет установлен: {currentUserColor.Name}");
+                    return;
                 }
             }
-            else if (message.Contains("[ФАЙЛ от"))
+
+            // Обычное сообщение
+            AddChatMessage(message);
+
+            // Пытаемся определить пользователя и сохранить цвет
+            string username = ExtractUsernameFromMessage(message);
+            if (!string.IsNullOrEmpty(username))
             {
-                // Сообщение о файле без цвета
-                ExtractFileNameFromMessage(message);
-                AddChatMessage(message);
+                // Если это сообщение от Pagan821 и у него еще нет цвета
+                if (username == "Pagan821" && !userColors.ContainsKey(username))
+                {
+                    SaveUserColor("Pagan821", Color.Pink);
+                }
             }
-            else
+        }
+
+        // Улучшенный метод извлечения имени пользователя
+        private string ExtractUsernameFromMessage(string message)
+        {
+            try
             {
-                // Обычное сообщение без цвета
-                AddChatMessage(message);
+                // Обработка сообщений о подключении
+                if (message.Contains("подключился к чату"))
+                {
+                    int end = message.IndexOf(" подключился к чату");
+                    if (end > 0)
+                    {
+                        return message.Substring(0, end);
+                    }
+                }
+
+                // Обработка сообщений об отключении
+                if (message.Contains("покинул чат"))
+                {
+                    int end = message.IndexOf(" покинул чат");
+                    if (end > 0)
+                    {
+                        return message.Substring(0, end);
+                    }
+                }
+
+                // Обработка обычных сообщений: [Username]: text
+                if (message.StartsWith("[") && message.Contains("]: "))
+                {
+                    int start = message.IndexOf('[') + 1;
+                    int end = message.IndexOf(']');
+                    if (start > 0 && end > start)
+                    {
+                        return message.Substring(start, end - start);
+                    }
+                }
+
+                // Обработка сообщений о файлах: [ФАЙЛ от Username]: filename
+                if (message.Contains("[ФАЙЛ от "))
+                {
+                    int start = message.IndexOf("[ФАЙЛ от ") + 9;
+                    int end = message.IndexOf("]:");
+                    if (start > 0 && end > start)
+                    {
+                        return message.Substring(start, end - start);
+                    }
+                }
+
+                // Если это сообщение сервера
+                if (message.Contains("Server"))
+                {
+                    return "server";
+                }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка извлечения имени пользователя: {ex.Message}");
+            }
+
+            return string.Empty;
         }
 
         private void ExtractFileNameFromMessage(string message)
@@ -725,57 +794,30 @@ namespace TOP_Messenger
             if (!userColors.ContainsKey(username))
             {
                 userColors.Add(username, color);
+                Console.WriteLine($"Добавлен цвет для пользователя {username}: {color.Name}");
             }
             else
             {
                 userColors[username] = color;
+                Console.WriteLine($"Обновлен цвет для пользователя {username}: {color.Name}");
             }
 
             UpdateUserColorsInListBox();
         }
 
-        private string ExtractUsernameFromMessage(string message)
-        {
-            // Извлекаем имя пользователя из сообщения
-            if (message.Contains("["))
-            {
-                int start = message.IndexOf('[') + 1;
-                int end = message.IndexOf(']');
-                if (start > 0 && end > start)
-                {
-                    return message.Substring(start, end - start);
-                }
-            }
-            else if (message.Contains("подключился к чату"))
-            {
-                int end = message.IndexOf(" подключился к чату");
-                if (end > 0)
-                {
-                    return message.Substring(0, end);
-                }
-            }
-            else if (message.Contains("покинул чат"))
-            {
-                int end = message.IndexOf(" покинул чат");
-                if (end > 0)
-                {
-                    return message.Substring(0, end);
-                }
-            }
-
-            return string.Empty;
-        }
-
-         private void SaveUserColorFromMessage(string message, Color color)
+        private void SaveUserColorFromMessage(string message, Color color)
         {
             string username = ExtractUsernameFromMessage(message);
             if (!string.IsNullOrEmpty(username))
             {
                 SaveUserColor(username, color);
+                Console.WriteLine($"Сохранен цвет из сообщения для {username}: {color.Name}");
+            }
+            else
+            {
+                Console.WriteLine($"Не удалось извлечь имя пользователя из: {message}");
             }
         }
-
-
 
         private void ListBoxChat_MeasureItem(object sender, MeasureItemEventArgs e)
         {
@@ -804,89 +846,66 @@ namespace TOP_Messenger
 
             string text = listBoxChat.Items[e.Index].ToString();
             Color color = Color.Black;
-            bool isFileMessage = false;
 
-            // Проверка на сообщения о файлах
-            if (text.Contains("[ФАЙЛ от"))
+            // Извлекаем имя пользователя из сообщения
+            string username = ExtractUsernameFromMessage(text);
+
+            // Если удалось извлечь имя пользователя, используем его цвет
+            if (!string.IsNullOrEmpty(username))
             {
-                color = Color.DarkGreen;
-                isFileMessage = true;
-                e.Graphics.FillRectangle(new SolidBrush(Color.LightYellow), e.Bounds);
-            }
-            else if (text.Contains("Выбран файл:") || text.Contains("Отправляю файл:") || text.Contains("Файл отправлен"))
-            {
-                color = Color.DarkBlue;
-            }
-            else if (text.Contains("Server"))
-            {
-                color = Color.DarkRed;
-            }
-            else if (text.Contains("Ваш цвет"))
-            {
-                color = Color.Green;
-            }
-            else if (text.Contains("Подключено"))
-            {
-                color = Color.Blue;
-            }
-            else if (text.StartsWith("[Вы]:"))
-            {
-                color = currentUserColor;
-            }
-            else if (text.Contains("подключился к чату") || text.Contains("покинул чат"))
-            {
-                string username = ExtractUsernameFromMessage(text);
-                if (!string.IsNullOrEmpty(username))
+                if (userColors.ContainsKey(username))
                 {
-                    if (userColors.ContainsKey(username))
+                    color = userColors[username];
+                }
+                else if (username.StartsWith("Guest#"))
+                {
+                    // Для гостей используем специальный цвет
+                    color = Color.DarkSlateGray;
+                    if (!userColors.ContainsKey(username))
                     {
-                        color = userColors[username];
-                    }
-                    else
-                    {
-                        color = Color.DarkGray;
+                        userColors[username] = color;
                     }
                 }
                 else
                 {
-                    color = Color.DarkGray;
+                    // Для неизвестных пользователей назначаем цвет на основе хэша
+                    int hash = Math.Abs(username.GetHashCode());
+                    Color[] defaultColors = {
+                        Color.DarkRed, Color.DarkBlue, Color.DarkGreen,
+                        Color.DarkMagenta, Color.DarkCyan, Color.DarkOrange,
+                        Color.DarkViolet, Color.DarkSlateBlue
+                    };
+                    color = defaultColors[hash % defaultColors.Length];
+                    userColors[username] = color;
                 }
             }
-            else if (text.StartsWith("["))
+            else
             {
-                string username = ExtractUsernameFromMessage(text);
-                if (!string.IsNullOrEmpty(username))
+                // Специальные типы сообщений
+                if (text.Contains("[ФАЙЛ от"))
                 {
-                    if (userColors.ContainsKey(username))
-                    {
-                        color = userColors[username];
-                    }
-                    else
-                    {
-                        // Проверяем известных пользователей
-                        if (username.Contains("krs333") || username.Contains("Pagan821"))
-                            color = Color.DarkRed;
-                        else if (username.Contains("cat_noir"))
-                            color = Color.Black;
-                        else if (username.Contains("denden"))
-                            color = Color.DarkGreen;
-                        else if (username.Contains("lady_bug"))
-                            color = Color.DarkCyan;
-                        else if (username.Contains("tabeer"))
-                            color = Color.DarkOrange;
-                        else if (username.Contains("lushPush"))
-                            color = Color.DarkViolet;
-                        else if (username.Contains("Siles"))
-                            color = Color.DarkSlateBlue;
-                        else if (username.Contains("USF055"))
-                            color = Color.MidnightBlue;
-                        else if (username.Contains("vld666"))
-                            color = Color.Maroon;
-                        else if (username.Contains("ananas"))
-                            color = Color.Purple;
-                        else
-                            color = Color.DarkSlateGray;
-                    }
+                    color = Color.DarkGreen;
+                    e.Graphics.FillRectangle(new SolidBrush(Color.LightYellow), e.Bounds);
+                }
+                else if (text.Contains("Выбран файл:") || text.Contains("Отправляю файл:") || text.Contains("Файл отправлен"))
+                {
+                    color = Color.DarkBlue;
+                }
+                else if (text.Contains("Server"))
+                {
+                    color = Color.DarkRed;
+                }
+                else if (text.Contains("Ваш цвет"))
+                {
+                    color = Color.Green;
+                }
+                else if (text.Contains("Подключено"))
+                {
+                    color = Color.Blue;
+                }
+                else if (text.StartsWith("[Вы]:"))
+                {
+                    color = currentUserColor;
                 }
                 else
                 {
@@ -894,14 +913,13 @@ namespace TOP_Messenger
                 }
             }
 
-            // Создаем формат с переносом слов
+            // Отрисовка текста
             StringFormat format = new StringFormat();
             format.Alignment = StringAlignment.Near;
             format.LineAlignment = StringAlignment.Near;
             format.FormatFlags = StringFormatFlags.LineLimit;
             format.Trimming = StringTrimming.Word;
 
-            // Создаем прямоугольник для текста с отступами
             Rectangle textRect = new Rectangle(
                 e.Bounds.X + 2,
                 e.Bounds.Y + 2,

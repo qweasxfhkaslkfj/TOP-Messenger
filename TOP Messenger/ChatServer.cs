@@ -26,6 +26,7 @@ namespace TOP_Messenger
             Reader = new StreamReader(stream, Encoding.Unicode);
             Writer = new StreamWriter(stream, Encoding.Unicode) { AutoFlush = true };
         }
+
         public void Close()
         {
             try { Reader?.Close(); } catch { }
@@ -74,6 +75,7 @@ namespace TOP_Messenger
                 _isRunning = false;
             }
         }
+
         public void Stop()
         {
             if (!_isRunning) return;
@@ -163,17 +165,7 @@ namespace TOP_Messenger
                     clientConn.ClientName = currentClientName;
 
                     // Определяем цвет для пользователя
-                    if (currentClientName.StartsWith("Guest#"))
-                    {
-                        // Для гостей - случайный ярко-темный цвет
-                        clientColor = GetRandomDarkBrightColor();
-                    }
-                    else
-                    {
-                        // Для обычных пользователей - цвет на основе хэша имени
-                        clientColor = GetUserColorByName(currentClientName);
-                    }
-
+                    clientColor = GetUserColorByName(currentClientName);
                     clientConn.ClientColor = clientColor;
 
                     LogMessage($"Клиент {currentClientName} зарегистрировал имя. Цвет: {clientColor.Name}");
@@ -280,30 +272,54 @@ namespace TOP_Messenger
 
         private Color GetUserColorByName(string userName)
         {
-            int hash = Math.Abs(userName.GetHashCode());
-
-            Color[] darkBrightColors = new Color[]
+            // Явно задаем цвета для известных пользователей
+            switch (userName.ToLower())
             {
-                Color.DarkRed,
-                Color.DarkBlue,
-                Color.DarkGreen,
-                Color.DarkMagenta,
-                Color.DarkCyan,
-                Color.DarkOrange,
-                Color.DarkViolet,
-                Color.DarkSlateBlue,
-                Color.MidnightBlue,
-                Color.Maroon,
-                Color.Purple,
-                Color.Teal,
-                Color.Navy,
-                Color.OliveDrab,
-                Color.SaddleBrown,
-                Color.DarkSlateGray
-            };
+                case "pagan821": return Color.Pink; 
+                case "krs333": return Color.DarkOrange;
+                case "denden": return Color.DarkGreen;
+                case "cat_noir": return Color.Black;
+                case "lady_bug": return Color.DarkRed;
+                case "tabeer": return Color.Brown;
+                case "lushpush": return Color.DarkViolet;
+                case "siles": return Color.DarkSlateBlue;
+                case "usf055": return Color.MidnightBlue;
+                case "vld666": return Color.Maroon;
+                case "ananas": return Color.Purple;
+                case "server": return Color.Black;
+                default:
+                    // Для гостей и неизвестных пользователей - случайный темный цвет
+                    if (userName.StartsWith("Guest#"))
+                    {
+                        return GetRandomDarkBrightColor();
+                    }
 
-            int colorIndex = hash % darkBrightColors.Length;
-            return darkBrightColors[colorIndex];
+                    // Для других пользователей - на основе хэша
+                    int hash = Math.Abs(userName.GetHashCode());
+
+                    Color[] darkBrightColors = new Color[]
+                    {
+                        Color.DarkRed,
+                        Color.DarkBlue,
+                        Color.DarkGreen,
+                        Color.DarkMagenta,
+                        Color.DarkCyan,
+                        Color.DarkOrange,
+                        Color.DarkViolet,
+                        Color.DarkSlateBlue,
+                        Color.MidnightBlue,
+                        Color.Maroon,
+                        Color.Purple,
+                        Color.Teal,
+                        Color.Navy,
+                        Color.OliveDrab,
+                        Color.SaddleBrown,
+                        Color.DarkSlateGray
+                    };
+
+                    int colorIndex = hash % darkBrightColors.Length;
+                    return darkBrightColors[colorIndex];
+            }
         }
 
         private Color GetRandomDarkBrightColor()

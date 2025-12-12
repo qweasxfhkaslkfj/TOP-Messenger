@@ -44,9 +44,7 @@ namespace TOP_Messenger
         private bool _isRunning = false;
 
         public event Action<string> MessageLogged;
-        public event Action<string> MessageReceived;
-        public delegate void MessageReceivedHandler(string message, Color color);
-
+        public bool IsRunning => _isRunning;
 
         public void Start(string ipAddress, int port)
         {
@@ -107,8 +105,6 @@ namespace TOP_Messenger
             }
         }
 
-        public bool IsRunning => _isRunning;
-
         private void ListenForClients()
         {
             try
@@ -155,11 +151,11 @@ namespace TOP_Messenger
         private void HandleClient(ClientConnection clientConn)
         {
             string currentClientName = clientConn.ClientName;
-            Color clientColor = Color.Black; // цвет по умолчанию
+            Color clientColor = Color.Black;
 
             try
             {
-                // Первое сообщение от клиента - его имя
+                // Получаем логин пользователя от клиента
                 string initialMessage = clientConn.Reader.ReadLine();
                 if (!string.IsNullOrEmpty(initialMessage))
                 {
@@ -167,25 +163,31 @@ namespace TOP_Messenger
                     clientConn.ClientName = currentClientName;
 
                     // Определяем цвет для пользователя
-                    clientColor = GetUserColor(currentClientName);
+                    if (currentClientName.StartsWith("Guest#"))
+                    {
+                        // Для гостей - случайный ярко-темный цвет
+                        clientColor = GetRandomDarkBrightColor();
+                    }
+                    else
+                    {
+                        // Для обычных пользователей - цвет на основе хэша имени
+                        clientColor = GetUserColorByName(currentClientName);
+                    }
+
                     clientConn.ClientColor = clientColor;
 
                     LogMessage($"Клиент {currentClientName} зарегистрировал имя. Цвет: {clientColor.Name}");
                 }
 
-                // Отправляем информацию о цвете клиенту
-                clientConn.Writer.WriteLine($"COLOR:{clientColor.ToArgb()}");
-                clientConn.Writer.Flush();
-
-                // Форматируем сообщение о подключении с цветом
-                string formattedConnectMessage = $"$COLOR:{clientColor.ToArgb()}$[{currentClientName} подключился к чату]";
-
-                // 1. Отправляем сообщение о подключении ВСЕМ клиентам (включая самого пользователя)
-                BroadcastMessage(formattedConnectMessage, null);
-                // 2. Отправляем самому пользователю его цвет
+                // Отправляем цвет пользователю
                 clientConn.Writer.WriteLine($"YOUR_COLOR:{clientColor.ToArgb()}");
                 clientConn.Writer.Flush();
 
+                // Отправляем всем сообщение о подключении нового пользователя
+                string connectMessage = $"{currentClientName} подключился к чату";
+                BroadcastColoredMessage(connectMessage, clientColor);
+
+                // Основной цикл обработки сообщений от клиента
                 string message;
                 while (_isRunning && (message = clientConn.Reader.ReadLine()) != null)
                 {
@@ -197,17 +199,12 @@ namespace TOP_Messenger
                         break;
                     }
 
-                    // Форматируем сообщение с информацией о цвете
-                    string formattedMessage = $"$COLOR:{clientColor.ToArgb()}$[{currentClientName}]: {message}";
-                    LogMessage(formattedMessage);
-
-                    // Отправляем сообщение ВСЕМ клиентам
-                    BroadcastMessage(formattedMessage, null);
-
-                    // Также отправляем сообщение самому отправителю с пометкой [Вы]
-                    string selfMessage = $"$COLOR:{clientColor.ToArgb()}$[Вы]: {message}";
-                    clientConn.Writer.WriteLine(selfMessage);
-                    clientConn.Writer.Flush();
+                    if (!string.IsNullOrEmpty(message))
+                    {
+                        // Отправляем сообщение всем остальным клиентам
+                        string coloredMessage = $"[{currentClientName}]: {message}";
+                        BroadcastColoredMessage(coloredMessage, clientColor, clientConn);
+                    }
                 }
             }
             catch (IOException)
@@ -229,23 +226,45 @@ namespace TOP_Messenger
                     _connectedClients.Remove(clientConn);
                 }
 
+                // Отправляем сообщение об отключении
+                if (!string.IsNullOrEmpty(currentClientName))
+                {
+                    string disconnectMessage = $"{currentClientName} покинул чат";
+                    BroadcastColoredMessage(disconnectMessage, clientColor);
+                }
+
                 clientConn.Close();
-
-                // Сообщение об отключении также с цветом
-                string formattedDisconnectMessage = $"$COLOR:{clientColor.ToArgb()}$[{currentClientName} покинул чат]";
-                BroadcastMessage(formattedDisconnectMessage, null);
-
                 LogMessage($"[{currentClientName}] отключен.");
             }
         }
 
-        // Исправленный метод BroadcastMessage - отправляет ВСЕМ
-        private void BroadcastMessage(string message, ClientConnection sender)
+        private void BroadcastColoredMessage(string message, Color color)
+        {
+            string formattedMessage = $"COLOR:{color.ToArgb()}|{message}";
+            BroadcastMessage(formattedMessage);
+        }
+
+        private void BroadcastColoredMessage(string message, Color color, ClientConnection excludeClient)
+        {
+            string formattedMessage = $"COLOR:{color.ToArgb()}|{message}";
+            BroadcastMessage(formattedMessage, excludeClient);
+        }
+
+        private void BroadcastMessage(string message)
+        {
+            BroadcastMessage(message, null);
+        }
+
+        private void BroadcastMessage(string message, ClientConnection excludeClient)
         {
             lock (_clientsLock)
             {
                 foreach (var client in _connectedClients)
                 {
+                    // Пропускаем исключенного клиента, если указан
+                    if (excludeClient != null && client == excludeClient)
+                        continue;
+
                     try
                     {
                         client.Writer.WriteLine(message);
@@ -253,24 +272,67 @@ namespace TOP_Messenger
                     }
                     catch
                     {
-                        // Обработка ошибок отправки
+                        // Игнорируем ошибки отправки
                     }
                 }
             }
         }
 
-
-
-
-
-
-
-
-
-        private void SendMessageToOthers(string message, ClientConnection sender)
+        private Color GetUserColorByName(string userName)
         {
-            BroadcastMessage(message, sender);
+            int hash = Math.Abs(userName.GetHashCode());
+
+            Color[] darkBrightColors = new Color[]
+            {
+                Color.DarkRed,
+                Color.DarkBlue,
+                Color.DarkGreen,
+                Color.DarkMagenta,
+                Color.DarkCyan,
+                Color.DarkOrange,
+                Color.DarkViolet,
+                Color.DarkSlateBlue,
+                Color.MidnightBlue,
+                Color.Maroon,
+                Color.Purple,
+                Color.Teal,
+                Color.Navy,
+                Color.OliveDrab,
+                Color.SaddleBrown,
+                Color.DarkSlateGray
+            };
+
+            int colorIndex = hash % darkBrightColors.Length;
+            return darkBrightColors[colorIndex];
         }
+
+        private Color GetRandomDarkBrightColor()
+        {
+            Random random = new Random(Guid.NewGuid().GetHashCode());
+
+            Color[] guestColors = new Color[]
+            {
+                Color.DarkRed,
+                Color.DarkBlue,
+                Color.DarkGreen,
+                Color.DarkMagenta,
+                Color.DarkCyan,
+                Color.DarkOrange,
+                Color.DarkViolet,
+                Color.DarkSlateBlue,
+                Color.MidnightBlue,
+                Color.Maroon,
+                Color.Purple,
+                Color.Teal,
+                Color.Navy,
+                Color.OliveDrab,
+                Color.SaddleBrown,
+                Color.DarkSlateGray
+            };
+
+            return guestColors[random.Next(guestColors.Length)];
+        }
+
         private void LogMessage(string message)
         {
             MessageLogged?.Invoke(message);

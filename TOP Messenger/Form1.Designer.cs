@@ -54,6 +54,7 @@
             this.panelChats.SuspendLayout();
             this.panelHistoryFiles.SuspendLayout();
             this.SuspendLayout();
+            this.buttonFile.Click += new System.EventHandler(this.buttonFile_Click);
             // 
             // buttonPlayGame
             // 

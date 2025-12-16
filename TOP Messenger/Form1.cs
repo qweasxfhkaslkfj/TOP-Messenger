@@ -20,7 +20,7 @@ namespace TOP_Messenger
         private StreamWriter writer;
         private Thread receiveThread;
         private bool isConnected = false;
-        private string serverIP = "192.168.88.145";
+        private string serverIP = "192.168.88.128";
         private int serverPort = 8888;
         private Color currentUserColor = Color.Black;
 
@@ -77,7 +77,7 @@ namespace TOP_Messenger
                     }
                 };
 
-                string localIP = "192.168.88.145";
+                string localIP = "192.168.88.128";
                 serverIP = localIP;
                 chatServer.Start(localIP, serverPort);
                 AddServerLog($"Сервер запущен на {localIP}:{serverPort}");

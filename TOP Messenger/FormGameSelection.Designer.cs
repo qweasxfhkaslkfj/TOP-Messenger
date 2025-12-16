@@ -39,6 +39,7 @@
             this.btnTicTacToe.TabIndex = 0;
             this.btnTicTacToe.Text = "Крестики нолики";
             this.btnTicTacToe.UseVisualStyleBackColor = true;
+            this.btnTicTacToe.Click += new System.EventHandler(this.btnTicTacToe_Click);
             // 
             // FormGameSelection
             // 

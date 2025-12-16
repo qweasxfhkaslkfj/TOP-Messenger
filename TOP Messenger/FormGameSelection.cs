@@ -16,5 +16,12 @@ namespace TOP_Messenger
         {
             InitializeComponent();
         }
+
+        private void btnTicTacToe_Click(object sender, EventArgs e)
+        {
+            FormTicTacToe formTicTacToe = new FormTicTacToe();
+            formTicTacToe.ShowDialog();
+            this.Close();
+        }
     }
 }

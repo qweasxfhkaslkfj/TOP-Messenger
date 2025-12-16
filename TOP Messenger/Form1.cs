@@ -1240,9 +1240,9 @@ namespace TOP_Messenger
         // Кнопка "Играть"
         private void buttonPlayGame_Click(object sender, EventArgs e)
         {
-            // Реализация игры
-            MessageBox.Show("Функция игры в разработке", "Игра",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
+           FormGameSelection formGameSelection = new FormGameSelection();
+            formGameSelection.ShowDialog();
+            this.Hide();
         }
 
         // Обработчики кнопок пользователей
